@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.edge.systemdownload"
-    android:versionCode="7"
-    android:versionName="2.5">
+    package="io.github.lswlc33.edge_download_change"
+    android:versionCode="8"
+    android:versionName="2.6">
 
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
 
@@ -53,7 +53,7 @@
         <!-- settings + status channel between this app and the injected Edge process -->
         <provider
             android:name=".ModuleProvider"
-            android:authorities="com.edge.systemdownload.settings"
+            android:authorities="io.github.lswlc33.edge_download_change.settings"
             android:exported="true"
             android:enabled="true" />
     </application>

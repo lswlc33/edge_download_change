@@ -1,4 +1,4 @@
-package com.edge.systemdownload;
+package io.github.lswlc33.edge_download_change;
 
 import android.app.Activity;
 import android.app.AlertDialog;

@@ -48,7 +48,7 @@ Requirements: a rooted device with a framework supporting **libxposed API 102** 
 
 1. **Install**:
    - **stable**: grab the newest APK from [Releases](https://github.com/lswlc33/edge_download_change/releases/latest) (tag looks like `6-2.4`);
-   - **bleeding edge**: the [nightly pre-release](https://github.com/lswlc33/edge_download_change/releases/tag/nightly) is rebuilt on every push;
+   - **bleeding edge (beta)**: the newest `v2.6-beta.N` pre-release (versionName contains `beta`, which the official module repository serves through its beta channel);
    - or build locally: `bash lsp_module/build.sh` (artifact `edge_download_change-<version>.apk`).
    All channels use the same signing key, so they can be installed over each other.
 2. **Enable** the module in your Xposed/LSPosed manager. The scope `com.microsoft.emmx` is
@@ -104,7 +104,7 @@ minimal.
 | Channel | Content | Trigger |
 |---|---|---|
 | **Release (stable)** | stable builds, tag = `<versionCode>-<versionName>` as required by the official module repository | Actions → **Release** → Run workflow |
-| **Nightly (pre-release)** | rebuilt on every push to `main`, file name carries the short SHA | automatic |
+| **Beta (pre-release, beta channel)** | rebuilt on every push to `main` with a `2.6-beta.<run>` versionName and the canonical tag `8-2.6-beta.<run>` | automatic |
 | **LSPosed repository** | distribution through the official module repo, installable/updatable from the LSPosed manager | see [publishing guide](docs/publish-to-lsposed-repo.md) (Chinese) |
 
 Builds run on GitHub Actions and are signed with the key stored in the repository secrets

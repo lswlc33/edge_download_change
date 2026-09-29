@@ -49,7 +49,7 @@ Edge for Android（`com.microsoft.emmx`）。
 
 1. **安装模块**：
    - **稳定版**：从 [Releases](https://github.com/lswlc33/edge_download_change/releases/latest) 下载最新 APK（tag 形如 `6-2.4`）；
-   - **尝鲜版**：从 [Nightly 预发布](https://github.com/lswlc33/edge_download_change/releases/tag/nightly) 下载每次推送自动构建的 APK；
+   - **尝鲜版（beta）**：从 [预发布列表](https://github.com/lswlc33/edge_download_change/releases) 下载最新的 `v2.6-beta.N`（版本号带 `beta`，官方模块仓库会把它归入 beta 通道）；
    - 或本地构建：`bash lsp_module/build.sh`（产物 `edge_download_change-<版本>.apk`）。
    两种渠道都用同一把密钥签名，可以互相覆盖安装。
 2. **启用模块**：在 LSPosed 管理器里启用本模块。作用域 `com.microsoft.emmx` 已由模块**静态声明**，
@@ -113,8 +113,8 @@ Edge 是 Chromium 内核，**下载引擎在 native 层**，Java 侧只是桥接
 | 渠道 | 内容 | 触发方式 |
 |---|---|---|
 | **Release（稳定版）** | 手动发布的稳定版，tag = `版本号-版本名`（官方模块仓库要求的格式） | Actions → **Release** → Run workflow |
-| **Nightly（预发布）** | 每次 push 到 `main` 自动构建，文件名带短 SHA | 自动（也可手动触发） |
-| **LSPosed 仓库** | 通过官方模块仓库分发，可在 LSPosed 管理器「仓库」页直接安装/更新 | 见 [发布指引](docs/publish-to-lsposed-repo.md) |
+| **Beta（预发布，官方 beta 通道）** | 每次 push 到 `main` 自动构建，versionName 形如 `2.6-beta.<运行号>`，官方仓库会把它归入 **beta 通道** | 自动（也可手动触发） |
+| **LSPosed 仓库** | 通过官方模块仓库分发（稳定版走稳定通道、`-beta.N` 走 beta 通道），可在 LSPosed 管理器「仓库」页直接安装/更新 | 见 [发布指引](docs/publish-to-lsposed-repo.md) |
 
 构建由 GitHub Actions 完成，签名密钥存放在仓库 Secrets（`SIGNING_KEYSTORE_BASE64` 等），
 因此**每次构建的签名一致**，可以覆盖安装。本地构建默认使用 `lsp_module/module.keystore`（同一把密钥）。

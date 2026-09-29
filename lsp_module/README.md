@@ -89,6 +89,14 @@ Edge 小版本更新时通常仍能工作。
 
 ## 版本记录
 
+**2.6**
+- **包名改为 `io.github.lswlc33.edge_download_change`**（原 `com.edge.systemdownload`）：应用 id、
+  Java 包、Provider authority（`io.github.lswlc33.edge_download_change.settings`）与
+  `META-INF/xposed/java_init.list` 的入口类全部同步更新；签名密钥不变，但**包名变了，
+  需先卸载旧版再安装**。改名原因：官方模块仓库对 `com.edge.*` 这类域名无自有的包名会人工审核，
+  `io.github.<用户名>.*` 是官方样本里最常见的做法（30 个样本中 15 个如此）。
+- **nightly 升级为官方 beta 通道**：每次 push 自动构建 `-beta.<运行号>` 并发 pre-release，tag 为规范格式。
+
 **2.5**
 - **提示策略：只在出错/回退时 Toast，成功动作全部静默**，让浏览体验更无感。移除的提示：
   已就绪 ✓、已接管下载、已交给 X、已复制链接、已取消、正在获取下载链接、hook deferred（等待 Edge 加载）；
@@ -239,7 +247,7 @@ lsp_module/
 ```bash
 # 依赖：JDK 17、Android SDK（platforms;android-35、build-tools;35.0.0）、python3
 bash build.sh                       # 产物：edge_download_change-<versionName>.apk（已签名）
-APK_SUFFIX=-nightly-abc1234 bash build.sh   # 自定义后缀（CI 的 nightly 用）
+APK_SUFFIX=-beta-abc1234 bash build.sh      # 可选：自定义文件名后缀
 ```
 
 - 脚本跨平台：Windows Git Bash / Linux / macOS 均可；SDK 路径依次取
@@ -259,7 +267,7 @@ APK_SUFFIX=-nightly-abc1234 bash build.sh   # 自定义后缀（CI 的 nightly �
 
 | 工作流 | 触发 | 产物 |
 |---|---|---|
-| `.github/workflows/nightly.yml` | push 到 `main` / 手动 | 预发布 `nightly`（tag 固定 `nightly`，文件名含短 SHA） |
+| `.github/workflows/nightly.yml` | push 到 `main` / 手动 | **beta 预发布**：自动把 versionName 改成 `<版本>-beta.<运行号>`，以规范 tag `<versionCode>-<版本>-beta.<运行号>` 发布（官方仓库据此归入 beta 通道），并保留最近 10 个 beta |
 | `.github/workflows/release.yml` | 手动，输入 `version`（须等于 `android:versionName`） | 正式 Release，**tag = `<versionCode>-<versionName>`**（官方模块仓库要求） |
 
 发版步骤：递增 `AndroidManifest.xml` 的 `versionCode`/`versionName`（并同步 `BuildInfo.VERSION`）→ push →

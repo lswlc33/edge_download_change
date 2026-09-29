@@ -1,10 +1,10 @@
-package com.edge.systemdownload;
+package io.github.lswlc33.edge_download_change;
 
 /** Shared constants for the module app and the injected (Edge) side. */
 final class BuildInfo {
 
     /** Module version, shown in the UI and reported by the injected side. */
-    static final String VERSION = "2.5";
+    static final String VERSION = "2.6";
 
     /** SharedPreferences file used for settings and as remote-preference fallback. */
     static final String PREFS_SETTINGS = "settings";
@@ -13,7 +13,7 @@ final class BuildInfo {
     static final String KEY_CUSTOM_PACKAGE = "downloader_custom_package";
 
     /** ContentProvider channel between the module app and the injected process. */
-    static final String AUTHORITY = "com.edge.systemdownload.settings";
+    static final String AUTHORITY = "io.github.lswlc33.edge_download_change.settings";
     static final String METHOD_SETTINGS = "settings";
     static final String METHOD_REPORT = "report";
 

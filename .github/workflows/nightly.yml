@@ -1,22 +1,25 @@
-name: Nightly
+name: Beta (nightly)
 
+# Every push to main builds a beta APK and publishes it as a pre-release whose tag is
+# <versionCode>-<versionName> with a "-beta.N" versionName. The official module
+# repository classifies releases whose versionName contains "beta"/"alpha" as the
+# beta channel, so these builds are served to users who opted into betas.
 on:
   push:
     branches: [main, master]
     paths-ignore: ['**/*.md', '.gitignore']
   workflow_dispatch:
 
-# One nightly at a time; a newer push cancels an in-flight build.
 concurrency:
-  group: nightly
+  group: beta
   cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  nightly:
-    name: Build nightly APK
+  beta:
+    name: Build beta APK
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +38,17 @@ jobs:
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager --install "platforms;android-35" "build-tools;35.0.0" | tail -3
 
+      - name: Mark this build as a beta
+        id: meta
+        run: |
+          BASE="$(grep -o 'android:versionName="[^"]*"' lsp_module/AndroidManifest.xml | head -1 | cut -d'"' -f2)"
+          CODE="$(grep -o 'android:versionCode="[^"]*"' lsp_module/AndroidManifest.xml | head -1 | cut -d'"' -f2)"
+          VER="${BASE}-beta.${GITHUB_RUN_NUMBER}"
+          sed -i "s/android:versionName=\"[^\"]*\"/android:versionName=\"${VER}\"/" lsp_module/AndroidManifest.xml
+          grep -E 'versionCode|versionName' lsp_module/AndroidManifest.xml
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "tag=${CODE}-${VER}" >> "$GITHUB_OUTPUT"
+
       - name: Build signed APK
         id: build
         env:
@@ -43,10 +57,8 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
-          # The suffix must be set in this very step (GITHUB_ENV only affects later steps),
-          # and the artifact path comes from the build output instead of a glob so a stale
+          # The artifact path comes from the build output instead of a glob so a stale
           # file can never be picked up.
-          export APK_SUFFIX="-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)"
           APK="$(bash lsp_module/build.sh | sed -n 's/^done: //p' | tail -1)"
           test -f "lsp_module/$APK" || { echo "::error::build artifact not found: $APK"; exit 1; }
           echo "apk=lsp_module/$APK" >> "$GITHUB_OUTPUT"
@@ -55,29 +67,40 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-apk
+          name: beta-apk
           path: ${{ steps.build.outputs.apk }}
           if-no-files-found: error
 
-      - name: Publish rolling pre-release
+      - name: Publish beta release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VER: ${{ steps.meta.outputs.version }}
         run: |
-          APK="${{ steps.build.outputs.apk }}"
-          NOTES="Automated nightly build.
+          NOTES="Beta build - served through the beta channel of the official module repository (versionName contains \"beta\").
 
+          - version: ${VER}
           - commit: \`${GITHUB_SHA}\`
           - branch: \`${GITHUB_REF_NAME}\`
           - built: $(date -u '+%Y-%m-%d %H:%M UTC')
-          - source: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          - run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
 
-          This is an untested pre-release; the signing key is the same as for stable releases."
-
-          # Recreate the 'nightly' tag/release so it always points at the newest build.
-          gh release delete nightly --yes --cleanup-tag > /dev/null 2>&1 || true
-          gh release create nightly \
+          Signed with the same key as stable releases, so it installs over them."
+          gh release create "$TAG" \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --title "Nightly build" \
+            --title "v${VER}" \
             --notes "$NOTES"
-          gh release upload nightly "$APK"
+          gh release upload "$TAG" "${{ steps.build.outputs.apk }}"
+
+      - name: Prune old beta releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --limit 100 --json tagName,isPrerelease \
+            -q '[.[] | select(.isPrerelease)][10:] | .[].tagName' 2>/dev/null \
+          | while read -r tag; do
+              [ -n "$tag" ] || continue
+              echo "pruning old beta: $tag"
+              gh release delete "$tag" --yes --cleanup-tag || true
+            done

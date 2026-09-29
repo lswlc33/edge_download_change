@@ -10,7 +10,7 @@
 
 一个"有效仓库"必须满足：
 
-1. **仓库名 = 模块的包名**（本项目为 `com.edge.systemdownload`，由官方创建）；
+1. **仓库名 = 模块的包名**（本项目为 `io.github.lswlc33.edge_download_change`，由官方创建）；
 2. **仓库必须有非空的描述**，内容就是模块名称；
 3. **至少有一个有效 Release**；
 4. **每个有效 Release 至少要有一个 `.apk` 资产，且 tag 名必须是 `VersionCode-VersionName`**
@@ -31,12 +31,12 @@
 
 | 字段 | 填什么 |
 |---|---|
-| Package name | `com.edge.systemdownload` |
+| Package name | `io.github.lswlc33.edge_download_change` |
 | Description or reason | 模块简介 + 说明它是 LSPosed（libxposed API 102）模块、作用、源码地址 |
 
 点 **Submit on GitHub** → 会跳转到 `Xposed-Modules-Repo/submission` 仓库里一个**预填好的 Issue**，
 确认无误后直接提交 Issue 即可。审核通过后，官方会创建
-`https://github.com/Xposed-Modules-Repo/com.edge.systemdownload`，其中包含：
+`https://github.com/Xposed-Modules-Repo/io.github.lswlc33.edge_download_change`，其中包含：
 
 - `SOURCE_URL`：你的源码仓库地址
 - `SUMMARY`：一句话简介（显示在管理器列表里）
@@ -44,12 +44,12 @@
 
 > 另外：如果**你拥有 APK applicationId 对应的域名**，可以在该域名根上添加一条 TXT 记录
 > `lsposed-modules-repo-verification=你的GitHub用户名`，可用于快速通过验证。
-> 我们的包名 `com.edge.systemdownload` 不对应自有域名，因此走正常审核流程。
+> 我们的包名 `io.github.lswlc33.edge_download_change` 不对应自有域名，因此走正常审核流程。
 
 **建议的 Issue 内容（可直接复制）**
 
 ```text
-Package name: com.edge.systemdownload
+Package name: io.github.lswlc33.edge_download_change
 
 Module name: edge_download_change
 
@@ -139,13 +139,14 @@ Verified on Edge 153.0.4234.49 (com.microsoft.emmx). Static scope: com.microsoft
 
 1. **只在你的仓库发 Release**，不要尝试往组织仓库推东西（你也没有权限）。
 2. tag 一定用 `版本号-版本名`（本项目的 `release.yml` 已保证）。
-3. **需要"测试通道"时**：把 versionName 写成带 `alpha`/`beta` 的形式（如 `2.5-beta.1`）并用规范 tag 发
-   release，官方会归入 **beta 通道**。当前的 `nightly`（tag 固定为 `nightly`）**不满足** `版本号-版本名`，
-   因此不会被官方识别，只适合自测。
+3. **beta 通道**：versionName 带 `alpha`/`beta` 的 release 会被官方归入 beta 通道。本项目的
+   `.github/workflows/nightly.yml` 已经把每次 push 的构建自动打成 `2.6-beta.<运行号>` 并用
+   规范 tag `8-2.6-beta.<运行号>` 发布（GitHub 上标为 pre-release），因此 **push 即产出官方 beta 版本**；
+   稳定版仍走手动 Release 工作流。
 4. **只替换 Release 附件不触发同步**（官方明确说明），必须"新建 Release 或改动 Release 内容"。
 5. 组织仓库的 **description = 模块显示名**、**SUMMARY = 简介**：提交申请时把这两项写清楚
    （description 建议就是 `edge_download_change`，summary 一句话说明用途）。
-6. **包名与"品牌"风险**：`com.edge.systemdownload` 不含自有域名 → 走人工审核，审阅者也可能对
+6. **包名与"品牌"风险**：`io.github.lswlc33.edge_download_change` 不含自有域名 → 走人工审核，审阅者也可能对
    `com.edge.*`（冒充 Microsoft Edge 品牌）有顾虑。官方样本里 15/30 使用 `io.github.<用户名>.*`
    形式（如 `io.github.xiaotong6666.fusehide`）。若想换成 `io.github.lswlc33.edge_download_change`，
    **现在是最便宜的时机**（尚未提交；代价是设备上要卸载 v2.4 再装新包名版本，签名可保持不变）。

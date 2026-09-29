@@ -1,4 +1,4 @@
-package com.edge.systemdownload;
+package io.github.lswlc33.edge_download_change;
 
 import io.github.libxposed.api.XposedModule;
 import io.github.libxposed.api.XposedModuleInterface;

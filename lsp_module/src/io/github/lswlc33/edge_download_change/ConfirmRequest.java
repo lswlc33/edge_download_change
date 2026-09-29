@@ -1,4 +1,4 @@
-package com.edge.systemdownload;
+package io.github.lswlc33.edge_download_change;
 
 /**
  * An Edge download-confirmation dialog that this module has taken over before the

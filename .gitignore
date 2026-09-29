@@ -24,6 +24,18 @@ dex/
 # Downloaded third-party APKs used for analysis
 analysis/via/*.apk
 
+# Extracted native libraries and other generated analysis output (stay on disk only)
+so/
+*.so
+analysis/**/*.apk
+analysis/**/*.dex
+analysis/**/__pycache__/
+
+# Generated analysis indexes and python cache (regenerable, keep the repo small)
+analysis/*_index.txt
+__pycache__/
+analysis/__pycache__/
+
 # IDE / OS noise
 .idea/
 *.iml
