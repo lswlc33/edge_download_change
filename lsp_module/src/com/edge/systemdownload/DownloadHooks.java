@@ -67,7 +67,6 @@ final class DownloadHooks {
     private static volatile boolean sDownloadHooksReady;
     private static volatile boolean sInstallLogged;
     private static volatile boolean sConfirmResolveStarted;
-    private static volatile boolean sLoadedToastShown;
     private static volatile int sInstallRetries;
     private static volatile int sDumpCount;
 
@@ -136,7 +135,6 @@ final class DownloadHooks {
                             // First real context of the process: deliver reports and logs that
                             // were produced before the Application existed.
                             RemoteSettings.onContextAvailable();
-                            showLoadedToastOnce();
                         }
                         // The chrome split may not be loaded when the module first installs;
                         // an activity resume is a reliable moment to retry.
@@ -215,14 +213,12 @@ final class DownloadHooks {
                 log(4, "download hooks installed in " + processName);
                 RemoteSettings.reportState("inject", "hooks installed");
                 RemoteSettings.startHeartbeat();
-                showLoadedToastOnce();
             }
         } catch (Throwable t) {
             // The chrome split is usually not loaded yet on the first attempts; that is
             // expected and retried shortly (see scheduleInstallRetry).
             if (isClassLoadingIssue(t)) {
                 log(4, "download hooks deferred (chrome split not loaded yet): " + t);
-                toastAsync(Str.hookDeferred());
             } else {
                 log(5, "download hook installation failed: " + t);
                 RemoteSettings.reportState("hook_failed", String.valueOf(t));
@@ -611,7 +607,6 @@ final class DownloadHooks {
         sRecentItem = null;
         sTakeoverUntilMs = SystemClock.elapsedRealtime() + TAKEOVER_WINDOW_MS;
         log(4, "intercepted download: " + fileName + " (" + mime + ") " + url);
-        toastAsync(Str.intercepted(download.displayName()));
         showPendingAsync(activity, download);
     }
 
@@ -754,7 +749,7 @@ final class DownloadHooks {
         if (sConfirm == request) sConfirm = null;
         if (action == DialogPresenter.ACTION_DISMISS) {
             invokeCallback(request.callback, Boolean.FALSE);
-            toastAsync(Str.cancelled());
+            log(4, "user dismissed the dialog, download cancelled");
             return;
         }
         sWaitDecision = action;
@@ -762,7 +757,6 @@ final class DownloadHooks {
         sWaitUntilMs = SystemClock.elapsedRealtime() + WAIT_ITEM_WINDOW_MS;
         sTakeoverUntilMs = sWaitUntilMs;
         invokeCallback(request.callback, Boolean.TRUE);
-        toastAsync(Str.waitingForLink());
         final long token = sWaitUntilMs;
         MAIN.postDelayed(new Runnable() {
             @Override
@@ -791,7 +785,7 @@ final class DownloadHooks {
                 startSelectedDownloader(download);
                 break;
             default:
-                toastAsync(Str.cancelled());
+                log(4, "download cancelled by the user");
                 break;
         }
     }
@@ -826,7 +820,6 @@ final class DownloadHooks {
         // launch result is the only reliable signal.
         if (launchExternal(download, entry)) {
             log(4, "handed over to " + label + " (" + pkg + ")");
-            toastAsync(Str.handedTo(label));
             return;
         }
         log(4, "starting " + pkg + " failed, using the system downloader");
@@ -1096,16 +1089,6 @@ final class DownloadHooks {
                 }
             }
         });
-    }
-
-    /**
-     * The "module loaded" toast cannot be shown during hook installation (Edge's
-     * Application does not exist yet), so it is shown with the first available context.
-     */
-    private static void showLoadedToastOnce() {
-        if (sLoadedToastShown || !sInstallLogged) return;
-        sLoadedToastShown = true;
-        toastAsync(Str.loaded());
     }
 
     static void log(int priority, String message) {

@@ -4,7 +4,7 @@ package com.edge.systemdownload;
 final class BuildInfo {
 
     /** Module version, shown in the UI and reported by the injected side. */
-    static final String VERSION = "2.4";
+    static final String VERSION = "2.5";
 
     /** SharedPreferences file used for settings and as remote-preference fallback. */
     static final String PREFS_SETTINGS = "settings";

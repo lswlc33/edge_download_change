@@ -69,26 +69,4 @@
     <!-- Usage -->
     <string name="about_text">1. Enable the module in LSPosed (the scope com.microsoft.emmx is declared statically);\n2. Force-stop Edge and open it again, then tap a download link;\n3. A \"Download this file?\" dialog with Copy / Download appears - tapping Download creates the file with the selected downloader.\n\nKnown limitation: links that need a login cookie may fail with the system downloader - use Copy and paste the link into a logged-in tool instead.</string>
 
-    <!-- Injected side (shown inside Edge) -->
-    <string name="dlg_title">Download this file?</string>
-    <string name="dlg_download">Download</string>
-    <string name="dlg_copy">Copy</string>
-    <string name="dlg_target">\"Download\" will hand it over to %1$s</string>
-    <string name="toast_loaded">edge_download_change ready ✓</string>
-    <string name="toast_waiting">Getting the download link…</string>
-    <string name="toast_link_failed">Could not get the link; no download was created</string>
-    <string name="toast_intercepted">Download taken over: %1$s</string>
-    <string name="toast_copied">Download link copied</string>
-    <string name="toast_copy_failed">Copy failed, please copy manually</string>
-    <string name="toast_handed">Handed over to %1$s</string>
-    <string name="toast_cancelled">Edge download cancelled</string>
-    <string name="toast_no_downloader">%1$s could not be started; using the system downloader</string>
-    <string name="toast_system_handed">Handed over to the system downloader</string>
-    <string name="toast_system_unavailable">System downloader unavailable; link copied</string>
-    <string name="toast_system_failed">System downloader refused it; link copied</string>
-    <string name="toast_system_managed">This download is already handled by the system downloader</string>
-    <string name="toast_hook_deferred">edge_download_change: waiting for Edge to finish loading…</string>
-    <string name="toast_hook_failed">edge_download_change: hook installation failed, see the module log</string>
-    <string name="dl_system">System downloader (DownloadManager)</string>
-    <string name="dl_custom_prefix">Custom</string>
 </resources>

@@ -127,7 +127,6 @@ final class DialogPresenter {
             if (clipboard != null) {
                 clipboard.setPrimaryClip(ClipData.newPlainText("download-url", download.url));
             }
-            toast(download, Str.copied());
         } catch (Throwable t) {
             DownloadHooks.log(5, "copy failed", t);
             toast(download, Str.copyFailed());
@@ -165,7 +164,6 @@ final class DialogPresenter {
             }
             long id = manager.enqueue(request);
             DownloadHooks.log(4, "handed over to system DownloadManager, id=" + id + ", url=" + download.url);
-            toast(download, Str.systemHanded());
         } catch (Throwable t) {
             DownloadHooks.log(5, "system download enqueue failed", t);
             toast(download, Str.systemFailed());
