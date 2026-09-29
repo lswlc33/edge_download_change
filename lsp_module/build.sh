@@ -28,8 +28,8 @@ elif [ -d "$HOME/Library/Android/sdk" ]; then SDK="$HOME/Library/Android/sdk"
 else echo "error: Android SDK not found (set ANDROID_SDK_ROOT)" >&2; exit 1; fi
 
 case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*) EXE=".exe" ;;
-  *) EXE="" ;;
+  MINGW*|MSYS*|CYGWIN*) EXE=".exe"; CP_SEP=";" ;;
+  *) EXE=""; CP_SEP=":" ;;
 esac
 
 BT_VER="${BUILD_TOOLS_VERSION:-35.0.0}"
@@ -71,7 +71,7 @@ echo "== 3/6 aapt2 link =="
 
 echo "== 4/6 javac =="
 javac -encoding UTF-8 --release 8 -nowarn \
-  -cp "$AJ;build/apistub" \
+  -cp "$AJ${CP_SEP}build/apistub" \
   -d build/classes \
   $(find src build/gen -name '*.java')
 
