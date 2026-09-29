@@ -111,6 +111,14 @@ Builds run on GitHub Actions and are signed with the key stored in the repositor
 (`SIGNING_KEYSTORE_BASE64` …), so **every build has the same signature** and installs over the
 previous one. Local builds use `lsp_module/module.keystore` (the same key).
 
+### Optional: auto-mirror into the official module repository
+
+The mirror steps run only when a repository secret `MODULE_REPO_TOKEN` exists — a token that may
+write to `Xposed-Modules-Repo/io.github.lswlc33.edge_download_change` (a classic PAT with the
+`public_repo` scope is enough, then `gh secret set MODULE_REPO_TOKEN`). Without it the workflow
+skips mirroring and prints a notice; if the LSPosed side mirrors releases automatically, no token
+is needed at all.
+
 ## Repository layout
 
 ```

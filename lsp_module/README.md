@@ -268,9 +268,13 @@ APK_SUFFIX=-beta-abc1234 bash build.sh      # 可选：自定义文件名后缀
 | 工作流 | 触发 | 产物 |
 |---|---|---|
 | `.github/workflows/nightly.yml` | push 到 `main` / 手动 | **beta 预发布**：自动把 versionName 改成 `<版本>-beta.<运行号>`，以规范 tag `<versionCode>-<版本>-beta.<运行号>` 发布（官方仓库据此归入 beta 通道），并保留最近 10 个 beta |
-| `.github/workflows/release.yml` | 手动，输入 `version`（须等于 `android:versionName`） | 正式 Release，**tag = `<versionCode>-<versionName>`**（官方模块仓库要求） |
+| `.github/workflows/release.yml` | 手动（**version 可留空 → 自动 +1**） | 自动递增 versionCode/versionName → 提交回 main → 构建签名 → GitHub Release（tag `<versionCode>-<versionName>`）→ 镜像到官方模块仓库（需 `MODULE_REPO_TOKEN`） |
 
-发版步骤：递增 `AndroidManifest.xml` 的 `versionCode`/`versionName`（并同步 `BuildInfo.VERSION`）→ push →
-Actions → Release → Run workflow。发布到 LSPosed 官方仓库的完整流程见
-根目录 [`docs/publish-to-lsposed-repo.md`](../docs/publish-to-lsposed-repo.md)。
+发版步骤（两种都无需手动改版本号）：
+- **beta**：push 到 `main`，工作流把 versionName 改成 `<版本>-beta.<运行号>` 后发布；
+- **稳定版**：Actions → **Release** → Run workflow，`version` 留空即自动把最后一段 +1（`2.6` → `2.7`），
+  工作流会改版本、提交回 main（带 `[skip ci]`）、构建签名、发 Release，并在配置了
+  `MODULE_REPO_TOKEN` 时镜像到官方模块仓库 `Xposed-Modules-Repo/io.github.lswlc33.edge_download_change`。
+
+发布到 LSPosed 官方仓库的完整流程见根目录 [`docs/publish-to-lsposed-repo.md`](../docs/publish-to-lsposed-repo.md)。
 另见仓库根目录的 `README.md`（中文说明）/ `README.en.md`（English）与 `analysis/README.md`（hook 目标的推导过程）。

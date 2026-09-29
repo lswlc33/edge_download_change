@@ -112,12 +112,26 @@ Edge 是 Chromium 内核，**下载引擎在 native 层**，Java 侧只是桥接
 
 | 渠道 | 内容 | 触发方式 |
 |---|---|---|
-| **Release（稳定版）** | 手动发布的稳定版，tag = `版本号-版本名`（官方模块仓库要求的格式） | Actions → **Release** → Run workflow |
-| **Beta（预发布，官方 beta 通道）** | 每次 push 到 `main` 自动构建，versionName 形如 `2.6-beta.<运行号>`，官方仓库会把它归入 **beta 通道** | 自动（也可手动触发） |
+| **Release（稳定版）** | 稳定版，tag = `版本号-版本名`（官方模块仓库要求的格式） | Actions → **Release** → Run workflow（**版本号可留空，自动 +1**） |
+| **Beta（预发布，官方 beta 通道）** | versionName 形如 `2.6-beta.<运行号>`，官方仓库归入 **beta 通道** | 每次 push 到 `main` 自动 |
 | **LSPosed 仓库** | 通过官方模块仓库分发（稳定版走稳定通道、`-beta.N` 走 beta 通道），可在 LSPosed 管理器「仓库」页直接安装/更新 | 见 [发布指引](docs/publish-to-lsposed-repo.md) |
+
+**发版流程已全自动化**（不需要本地改版本号）：
+- **beta**：push 到 `main` 即自动改 versionName（`-beta.<运行号>`）→ 构建签名 → 发 GitHub pre-release → 镜像到官方模块仓库；
+- **稳定版**：Actions → **Release** → Run workflow（`version` 留空则自动把最后一段 +1，例如 `2.6` → `2.7`）。
+  工作流会：改 `versionCode`/`versionName`（含 `BuildInfo.VERSION`）→ 以 `chore(release): vX.Y [skip ci]` 提交回 `main`
+  → 构建签名 → 发 GitHub Release（tag `版本号-版本名`）→ 镜像到官方模块仓库。
 
 构建由 GitHub Actions 完成，签名密钥存放在仓库 Secrets（`SIGNING_KEYSTORE_BASE64` 等），
 因此**每次构建的签名一致**，可以覆盖安装。本地构建默认使用 `lsp_module/module.keystore`（同一把密钥）。
+
+> **一次性配置（可选）**：要在发版时自动把 release 同步到官方模块仓库
+> `Xposed-Modules-Repo/io.github.lswlc33.edge_download_change`，需要一个能写该仓库的 token，
+> 存为仓库 Secret `MODULE_REPO_TOKEN`：
+> ① GitHub → Settings → Developer settings → **Personal access tokens (classic)** → Generate new token，
+> 勾选 `public_repo`，复制；
+> ② 在项目目录执行 `gh secret set MODULE_REPO_TOKEN --repo lswlc33/edge_download_change` 并粘贴。
+> 未配置时工作流会跳过镜像并给出提示（若官方侧本来就会自动同步 release，则无需配置）。
 
 ## 项目结构
 

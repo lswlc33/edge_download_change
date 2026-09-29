@@ -1,9 +1,12 @@
 name: Beta (nightly)
 
-# Every push to main builds a beta APK and publishes it as a pre-release whose tag is
-# <versionCode>-<versionName> with a "-beta.N" versionName. The official module
-# repository classifies releases whose versionName contains "beta"/"alpha" as the
-# beta channel, so these builds are served to users who opted into betas.
+# Every push to main builds a beta APK and publishes it as a pre-release:
+#   - versionName becomes <version>-beta.<run_number>
+#   - tag is <versionCode>-<versionName> (the format the official module repository
+#     requires) and the versionName contains "beta", so it is filed under the beta
+#     channel there
+#   - the release is mirrored into the official module repository when the
+#     MODULE_REPO_TOKEN secret is configured
 on:
   push:
     branches: [main, master]
@@ -16,6 +19,10 @@ concurrency:
 
 permissions:
   contents: write
+
+env:
+  MODULE_REPO: Xposed-Modules-Repo/io.github.lswlc33.edge_download_change
+  MODULE_REPO_TOKEN: ${{ secrets.MODULE_REPO_TOKEN }}
 
 jobs:
   beta:
@@ -93,14 +100,41 @@ jobs:
             --notes "$NOTES"
           gh release upload "$TAG" "${{ steps.build.outputs.apk }}"
 
+      - name: Mirror into the official module repository
+        if: ${{ env.MODULE_REPO_TOKEN != '' }}
+        env:
+          GH_TOKEN: ${{ env.MODULE_REPO_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VER: ${{ steps.meta.outputs.version }}
+        run: |
+          gh release create "$TAG" --repo "$MODULE_REPO" \
+            --prerelease \
+            --title "v${VER}" \
+            --notes "Beta build - beta channel (versionName contains \"beta\").
+
+          Source: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" || true
+          gh release upload "$TAG" --repo "$MODULE_REPO" "${{ steps.build.outputs.apk }}" --clobber
+          echo "mirrored: https://github.com/${MODULE_REPO}/releases/tag/${TAG}"
+
+      - name: Note when mirroring is not configured
+        if: ${{ env.MODULE_REPO_TOKEN == '' }}
+        run: |
+          echo "::notice title=Official module repository::Skipped. Add the MODULE_REPO_TOKEN secret to publish betas there automatically."
+
       - name: Prune old beta releases
         env:
           GH_TOKEN: ${{ github.token }}
+          MODULE_REPO_TOKEN: ${{ secrets.MODULE_REPO_TOKEN }}
         run: |
-          gh release list --limit 100 --json tagName,isPrerelease \
-            -q '[.[] | select(.isPrerelease)][10:] | .[].tagName' 2>/dev/null \
-          | while read -r tag; do
-              [ -n "$tag" ] || continue
-              echo "pruning old beta: $tag"
-              gh release delete "$tag" --yes --cleanup-tag || true
-            done
+          prune() {
+            local repo="$1" token="$2" count="$3"
+            GH_TOKEN="$token" gh release list --repo "$repo" --limit 100 --json tagName,isPrerelease \
+              -q "[.[] | select(.isPrerelease)][${count}:] | .[].tagName" 2>/dev/null \
+            | while read -r tag; do
+                [ -n "$tag" ] || continue
+                echo "pruning old beta in $repo: $tag"
+                GH_TOKEN="$token" gh release delete "$tag" --repo "$repo" --yes --cleanup-tag || true
+              done
+          }
+          prune "${GITHUB_REPOSITORY}" "$GH_TOKEN" 10
+          if [ -n "$MODULE_REPO_TOKEN" ]; then prune "$MODULE_REPO" "$MODULE_REPO_TOKEN" 10; fi
