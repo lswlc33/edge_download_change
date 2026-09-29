@@ -42,8 +42,8 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
-          echo "APK_SUFFIX=-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_ENV"
-          bash lsp_module/build.sh
+          # The suffix must be set in this very step (GITHUB_ENV only affects later steps).
+          APK_SUFFIX="-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)" bash lsp_module/build.sh
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
