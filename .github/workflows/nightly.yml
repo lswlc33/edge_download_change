@@ -26,12 +26,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install Android platform and build-tools
+      # The runner image ships the Android SDK (ANDROID_SDK_ROOT / ANDROID_HOME);
+      # android-actions/setup-android is deliberately not used because recent
+      # versions fail on the removed legacy "tools" package.
+      - name: Ensure Android platform and build-tools
         run: |
+          echo "sdk root: ${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager --install "platforms;android-35" "build-tools;35.0.0" > /dev/null
+          sdkmanager --install "platforms;android-35" "build-tools;35.0.0" | tail -3
 
       - name: Build signed APK
         env:
