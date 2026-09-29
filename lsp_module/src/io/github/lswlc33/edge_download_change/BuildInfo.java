@@ -4,7 +4,7 @@ package io.github.lswlc33.edge_download_change;
 final class BuildInfo {
 
     /** Module version, shown in the UI and reported by the injected side. */
-    static final String VERSION = "2.6";
+    static final String VERSION = "2.7";
 
     /** SharedPreferences file used for settings and as remote-preference fallback. */
     static final String PREFS_SETTINGS = "settings";
