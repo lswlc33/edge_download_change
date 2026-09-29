@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 简体中文。应用名称遵循项目文件夹名（ASCII），不翻译。 -->
+<resources>
+    <string name="module_description">把 Edge（com.microsoft.emmx）的下载弹窗替换为「复制 / 下载」对话框，下载交给系统下载器或第三方下载器 App。</string>
+
+    <!-- 主界面 -->
+    <string name="main_subtitle">把 Edge 的下载确认框替换为「复制 / 下载」，下载由所选下载器创建，而不是 Edge 自己下载。</string>
+    <string name="section_status">状态</string>
+    <string name="section_settings">设置</string>
+    <string name="section_log">日志</string>
+    <string name="section_about">使用说明</string>
+    <string name="status_active">● 已激活</string>
+    <string name="status_inactive">○ 未检测到激活</string>
+    <string name="status_version">模块版本：%1$s</string>
+    <string name="status_last_inject">最近注入：%1$s（%2$s）</string>
+    <string name="status_framework">Xposed 框架：%1$s</string>
+    <string name="status_hook_ok">hook 安装成功</string>
+    <string name="status_hook_failed">注意：上次 hook 安装失败，请查看日志</string>
+    <string name="status_disabled_hint">提示：当前已关闭拦截，Edge 将使用原生下载。</string>
+    <string name="status_never_title">尚未收到来自 Edge 的注入信息，请依次确认：</string>
+    <string name="status_step1">① LSPosed 中本模块已启用；</string>
+    <string name="status_step2">② 作用域包含 Edge（本模块已静态声明，但部分管理器仍需手动勾选）；</string>
+    <string name="status_step3">③ 强制停止 Edge 后重新打开（切后台不算），打开后等约 10 秒；</string>
+    <string name="status_step4">④ 仍无信息时：在 LSPosed 日志里搜索 EdgeSysDL 与 module loaded。</string>
+    <string name="scope_text">作用域：com.microsoft.emmx\n（模块已静态声明；若长时间未激活，请在 LSPosed 中确认作用域）</string>
+    <string name="btn_refresh">刷新状态</string>
+    <string name="btn_open_lsposed">打开 LSPosed</string>
+    <string name="toast_refreshed">状态已刷新</string>
+    <string name="manager_missing_title">未找到 LSPosed 管理器</string>
+    <string name="manager_missing_body">请手动打开 LSPosed 管理器：\n\n1. 进入「模块」页面，启用本模块；\n2. 本模块使用静态作用域（com.microsoft.emmx），部分管理器仍需手动勾选；\n3. 强制停止 Edge 后重新打开。</string>
+    <string name="btn_ok">知道了</string>
+
+    <!-- 设置 -->
+    <string name="settings_intercept">开启拦截</string>
+    <string name="settings_intercept_hint">关闭后 Edge 恢复原生下载行为，模块不再弹窗</string>
+    <string name="toast_intercept_on">已开启拦截（无需重启 Edge）</string>
+    <string name="toast_intercept_off">已关闭拦截</string>
+    <string name="settings_target">下载目标</string>
+    <string name="settings_target_current">当前：%1$s</string>
+    <string name="btn_choose">选择</string>
+    <string name="settings_target_hint">点「下载」后：系统下载器由 Android 下载管理器下载；第三方下载器需要先安装对应 App，启动失败会自动回退到系统下载器。</string>
+    <string name="toast_target_changed">下载目标已切换</string>
+    <string name="picker_title">下载目标</string>
+    <string name="picker_installed">（已安装）</string>
+    <string name="picker_missing">（未安装）</string>
+    <string name="picker_custom">自定义包名：%1$s</string>
+    <string name="picker_custom_unset">未设置</string>
+    <string name="btn_cancel">取消</string>
+    <string name="custom_title">自定义下载器包名</string>
+    <string name="custom_hint">例如 com.xunlei.downloadprovider</string>
+    <string name="btn_save">保存</string>
+    <string name="toast_custom_keep">该包名未检测到，仍会保留设置</string>
+
+    <!-- 日志 -->
+    <string name="log_title">日志</string>
+    <string name="log_open">查看日志</string>
+    <string name="log_clear">清空日志</string>
+    <string name="toast_log_cleared">日志已清空</string>
+    <string name="log_hint">日志记录每次拦截、跳过（含原因）与下载跳转的结果，可用于诊断问题。</string>
+    <string name="log_copy_all">复制全部</string>
+    <string name="log_refresh">刷新</string>
+    <string name="log_clear_short">清空</string>
+    <string name="toast_log_copied">日志已复制</string>
+    <string name="toast_no_log">暂无日志</string>
+    <string name="log_empty">暂无日志。\n\n日志会在 Edge 中发生下列事件时写入：\n· 模块注入 / hook 安装结果\n· 每次拦截、跳过（含原因）与下载跳转结果</string>
+
+    <!-- 使用说明 -->
+    <string name="about_text">1. 在 LSPosed 中启用本模块（作用域 com.microsoft.emmx 已静态声明）；\n2. 强制停止 Edge 后重新打开，点网页下载链接；\n3. 出现「下载此文件？」（复制 / 下载），点「下载」即由所选下载器创建下载。\n\n已知限制：需要登录 Cookie 的链接，系统下载器可能下载失败 —— 这类文件请用「复制」后粘贴到已登录的工具中下载。</string>
+
+    <!-- 注入侧（在 Edge 内显示） -->
+    <string name="dlg_title">下载此文件？</string>
+    <string name="dlg_download">下载</string>
+    <string name="dlg_copy">复制</string>
+    <string name="dlg_target">「下载」将交给 %1$s</string>
+    <string name="toast_loaded">edge_download_change 已就绪 ✓</string>
+    <string name="toast_waiting">正在获取下载链接…</string>
+    <string name="toast_link_failed">未能获取下载链接，本次下载未创建</string>
+    <string name="toast_intercepted">已接管 Edge 下载：%1$s</string>
+    <string name="toast_copied">已复制下载链接</string>
+    <string name="toast_copy_failed">复制失败，请手动复制</string>
+    <string name="toast_handed">已交给 %1$s</string>
+    <string name="toast_cancelled">已取消 Edge 内置下载</string>
+    <string name="toast_no_downloader">%1$s 启动失败，改用系统下载器</string>
+    <string name="toast_system_handed">已交给系统下载器下载</string>
+    <string name="toast_system_unavailable">系统下载器不可用，已复制链接</string>
+    <string name="toast_system_failed">系统下载器接收失败，已复制链接</string>
+    <string name="toast_system_managed">该下载已由系统下载器接管</string>
+    <string name="toast_hook_deferred">edge_download_change：等待 Edge 加载完成…</string>
+    <string name="toast_hook_failed">edge_download_change：hook 安装失败，详见模块日志</string>
+    <string name="dl_system">系统下载器（DownloadManager）</string>
+    <string name="dl_custom_prefix">自定义</string>
+</resources>

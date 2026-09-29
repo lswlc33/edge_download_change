@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Default (English) strings. Chinese translations live in values-zh. -->
+<resources>
+    <!-- The app name follows the project folder name (ASCII, no Chinese). -->
+    <string name="app_name" translatable="false">edge_download_change</string>
+    <string name="module_description">Replaces Edge\'s download popup with a Copy / Download dialog; downloads are handed over to the system downloader or a third-party downloader app.</string>
+
+    <!-- Main screen -->
+    <string name="main_subtitle">Replaces Edge\'s download confirmation with a Copy / Download dialog; the download is created by the selected downloader, not by Edge.</string>
+    <string name="section_status">Status</string>
+    <string name="section_settings">Settings</string>
+    <string name="section_log">Log</string>
+    <string name="section_about">Usage</string>
+    <string name="status_active">● Active</string>
+    <string name="status_inactive">○ Not activated</string>
+    <string name="status_version">Module version: %1$s</string>
+    <string name="status_last_inject">Last injection: %1$s (%2$s)</string>
+    <string name="status_framework">Xposed framework: %1$s</string>
+    <string name="status_hook_ok">hook installed</string>
+    <string name="status_hook_failed">Note: the last hook installation failed, please check the log</string>
+    <string name="status_disabled_hint">Note: interception is currently disabled, Edge uses its native downloader.</string>
+    <string name="status_never_title">No injection report from Edge yet. Please check:</string>
+    <string name="status_step1">1. the module is enabled in LSPosed;</string>
+    <string name="status_step2">2. the scope includes Edge (this module declares it statically, but some managers still need it checked manually);</string>
+    <string name="status_step3">3. Edge was force-stopped and reopened (switching to background is not enough), then wait about 10 seconds;</string>
+    <string name="status_step4">4. if it still does not appear, search the LSPosed log for \'EdgeSysDL\' and \'module loaded\'.</string>
+    <string name="scope_text">Scope: com.microsoft.emmx\n(declared statically by the module; if it stays inactive, confirm the scope in LSPosed)</string>
+    <string name="btn_refresh">Refresh</string>
+    <string name="btn_open_lsposed">Open LSPosed</string>
+    <string name="toast_refreshed">Status refreshed</string>
+    <string name="manager_missing_title">LSPosed manager not found</string>
+    <string name="manager_missing_body">Please open the LSPosed manager manually:\n\n1. open Modules and enable the module;\n2. this module uses a static scope (com.microsoft.emmx); some managers still need it checked manually;\n3. force-stop Edge and open it again.</string>
+    <string name="btn_ok">OK</string>
+
+    <!-- Settings -->
+    <string name="settings_intercept">Enable interception</string>
+    <string name="settings_intercept_hint">When off, Edge keeps its native download behaviour and no dialog is shown</string>
+    <string name="toast_intercept_on">Interception enabled (no need to restart Edge)</string>
+    <string name="toast_intercept_off">Interception disabled</string>
+    <string name="settings_target">Download target</string>
+    <string name="settings_target_current">Current: %1$s</string>
+    <string name="btn_choose">Choose</string>
+    <string name="settings_target_hint">After tapping Download: the system downloader uses Android\'s DownloadManager; third-party downloaders must be installed. If a downloader cannot be started, the system downloader is used as a fallback.</string>
+    <string name="toast_target_changed">Download target switched</string>
+    <string name="picker_title">Download target</string>
+    <string name="picker_installed">（installed）</string>
+    <string name="picker_missing">（not installed）</string>
+    <string name="picker_custom">Custom package: %1$s</string>
+    <string name="picker_custom_unset">not set</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="custom_title">Custom downloader package</string>
+    <string name="custom_hint">e.g. com.xunlei.downloadprovider</string>
+    <string name="btn_save">Save</string>
+    <string name="toast_custom_keep">Package not detected; the setting is kept anyway</string>
+
+    <!-- Log -->
+    <string name="log_title">Log</string>
+    <string name="log_open">View log</string>
+    <string name="log_clear">Clear log</string>
+    <string name="toast_log_cleared">Log cleared</string>
+    <string name="log_hint">The log records every interception, skip (with reason) and download hand-off result.</string>
+    <string name="log_copy_all">Copy all</string>
+    <string name="log_refresh">Refresh</string>
+    <string name="log_clear_short">Clear</string>
+    <string name="toast_log_copied">Log copied</string>
+    <string name="toast_no_log">No log yet</string>
+    <string name="log_empty">No log yet.\n\nEntries are written when the following happens in Edge:\n· module injected / hook installation result\n· every interception and skip (with reason) and every download hand-off</string>
+
+    <!-- Usage -->
+    <string name="about_text">1. Enable the module in LSPosed (the scope com.microsoft.emmx is declared statically);\n2. Force-stop Edge and open it again, then tap a download link;\n3. A \"Download this file?\" dialog with Copy / Download appears - tapping Download creates the file with the selected downloader.\n\nKnown limitation: links that need a login cookie may fail with the system downloader - use Copy and paste the link into a logged-in tool instead.</string>
+
+    <!-- Injected side (shown inside Edge) -->
+    <string name="dlg_title">Download this file?</string>
+    <string name="dlg_download">Download</string>
+    <string name="dlg_copy">Copy</string>
+    <string name="dlg_target">\"Download\" will hand it over to %1$s</string>
+    <string name="toast_loaded">edge_download_change ready ✓</string>
+    <string name="toast_waiting">Getting the download link…</string>
+    <string name="toast_link_failed">Could not get the link; no download was created</string>
+    <string name="toast_intercepted">Download taken over: %1$s</string>
+    <string name="toast_copied">Download link copied</string>
+    <string name="toast_copy_failed">Copy failed, please copy manually</string>
+    <string name="toast_handed">Handed over to %1$s</string>
+    <string name="toast_cancelled">Edge download cancelled</string>
+    <string name="toast_no_downloader">%1$s could not be started; using the system downloader</string>
+    <string name="toast_system_handed">Handed over to the system downloader</string>
+    <string name="toast_system_unavailable">System downloader unavailable; link copied</string>
+    <string name="toast_system_failed">System downloader refused it; link copied</string>
+    <string name="toast_system_managed">This download is already handled by the system downloader</string>
+    <string name="toast_hook_deferred">edge_download_change: waiting for Edge to finish loading…</string>
+    <string name="toast_hook_failed">edge_download_change: hook installation failed, see the module log</string>
+    <string name="dl_system">System downloader (DownloadManager)</string>
+    <string name="dl_custom_prefix">Custom</string>
+</resources>

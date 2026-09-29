@@ -1,0 +1,28 @@
+# Build outputs and local tooling
+lsp_module/build/
+*.idsig
+*.apk.idsig
+
+# Signing keys are never committed: CI gets the key from the repository secrets
+# (SIGNING_KEYSTORE_BASE64), local builds use lsp_module/module.keystore which you
+# should back up - losing it means published updates can no longer be installed
+# over the previous version.
+*.keystore
+*.jks
+
+# Input APKs and extracted/derived analysis data
+*.apks
+apks_extracted/
+dex/
+*.dex
+
+# Downloaded third-party APKs used for analysis
+analysis/via/*.apk
+
+# IDE / OS noise
+.idea/
+*.iml
+.gradle/
+.DS_Store
+Thumbs.db
+*.log

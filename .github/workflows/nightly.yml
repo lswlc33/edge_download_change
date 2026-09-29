@@ -1,0 +1,74 @@
+name: Nightly
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore: ['**/*.md', '.gitignore']
+  workflow_dispatch:
+
+# One nightly at a time; a newer push cancels an in-flight build.
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  nightly:
+    name: Build nightly APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and build-tools
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager --install "platforms;android-35" "build-tools;35.0.0" > /dev/null
+
+      - name: Build signed APK
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          echo "APK_SUFFIX=-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_ENV"
+          bash lsp_module/build.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-apk
+          path: lsp_module/edge_download_change-*.apk
+          if-no-files-found: error
+
+      - name: Publish rolling pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK="$(ls lsp_module/edge_download_change-*.apk | head -1)"
+          NOTES="Automated nightly build.
+
+          - commit: \`${GITHUB_SHA}\`
+          - branch: \`${GITHUB_REF_NAME}\`
+          - built: $(date -u '+%Y-%m-%d %H:%M UTC')
+          - source: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+
+          This is an untested pre-release; the signing key is the same as for stable releases."
+
+          # Recreate the 'nightly' tag/release so it always points at the newest build.
+          gh release delete nightly --yes --cleanup-tag > /dev/null 2>&1 || true
+          gh release create nightly \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Nightly build" \
+            --notes "$NOTES"
+          gh release upload nightly "$APK"

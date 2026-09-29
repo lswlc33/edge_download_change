@@ -1,0 +1,364 @@
+package com.edge.systemdownload;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.text.InputType;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+/** Module home screen: status, settings (interception + download target) and the log entry. */
+public class MainActivity extends Activity {
+
+    private TextView statusValue;
+    private TextView statusDetail;
+    private TextView scopeValue;
+    private TextView downloaderValue;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setTitle(R.string.app_name);
+
+        LinearLayout content = UiKit.content(this);
+        content.addView(header());
+        content.addView(statusCard());
+        content.addView(settingsCard());
+        content.addView(logCard());
+        content.addView(aboutCard());
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        scroll.addView(content);
+        setContentView(scroll);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
+
+    // ------------------------------------------------------------------ sections
+
+    private View header() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(UiKit.dp(this, 4), UiKit.dp(this, 16), 0, UiKit.dp(this, 4));
+
+        TextView title = UiKit.title(this, getString(R.string.app_name));
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        box.addView(title);
+
+        TextView subtitle = UiKit.hint(this, getString(R.string.main_subtitle));
+        subtitle.setPadding(0, UiKit.dp(this, 4), 0, 0);
+        box.addView(subtitle);
+        return box;
+    }
+
+    private View statusCard() {
+        LinearLayout card = UiKit.card(this);
+        card.addView(UiKit.sectionTitle(this, getString(R.string.section_status)));
+
+        statusValue = UiKit.body(this, "");
+        statusValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        card.addView(statusValue);
+
+        statusDetail = UiKit.hint(this, "");
+        statusDetail.setPadding(0, UiKit.dp(this, 6), 0, 0);
+        card.addView(statusDetail);
+
+        card.addView(UiKit.divider(this));
+
+        scopeValue = UiKit.hint(this, "");
+        card.addView(scopeValue);
+
+        Button refresh = new Button(this);
+        refresh.setText(R.string.btn_refresh);
+        refresh.setAllCaps(false);
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refresh();
+                toast(getString(R.string.toast_refreshed));
+            }
+        });
+
+        Button openManager = new Button(this);
+        openManager.setText(R.string.btn_open_lsposed);
+        openManager.setAllCaps(false);
+        openManager.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!LsposedLauncher.open(MainActivity.this)) {
+                    new AlertDialog.Builder(MainActivity.this,
+                            android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                            .setTitle(R.string.manager_missing_title)
+                            .setMessage(R.string.manager_missing_body)
+                            .setPositiveButton(R.string.btn_ok, null)
+                            .show();
+                }
+            }
+        });
+        card.addView(UiKit.buttonRow(this, refresh, openManager));
+        return card;
+    }
+
+    private View settingsCard() {
+        LinearLayout card = UiKit.card(this);
+        card.addView(UiKit.sectionTitle(this, getString(R.string.section_settings)));
+
+        LinearLayout switchRow = new LinearLayout(this);
+        switchRow.setOrientation(LinearLayout.HORIZONTAL);
+        switchRow.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout labels = new LinearLayout(this);
+        labels.setOrientation(LinearLayout.VERTICAL);
+        labels.setLayoutParams(new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        labels.addView(UiKit.body(this, getString(R.string.settings_intercept)));
+        labels.addView(UiKit.hint(this, getString(R.string.settings_intercept_hint)));
+        switchRow.addView(labels);
+
+        final Switch toggle = new Switch(this);
+        toggle.setChecked(ModulePrefs.isEnabled(this));
+        toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(android.widget.CompoundButton buttonView, boolean isChecked) {
+                ModulePrefs.setEnabled(MainActivity.this, isChecked);
+                toast(getString(isChecked ? R.string.toast_intercept_on : R.string.toast_intercept_off));
+            }
+        });
+        switchRow.addView(toggle);
+        card.addView(switchRow);
+
+        card.addView(UiKit.divider(this));
+
+        LinearLayout targetRow = new LinearLayout(this);
+        targetRow.setOrientation(LinearLayout.HORIZONTAL);
+        targetRow.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout targetLabels = new LinearLayout(this);
+        targetLabels.setOrientation(LinearLayout.VERTICAL);
+        targetLabels.setLayoutParams(new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        targetLabels.addView(UiKit.body(this, getString(R.string.settings_target)));
+        downloaderValue = UiKit.hint(this, "");
+        targetLabels.addView(downloaderValue);
+        targetRow.addView(targetLabels);
+
+        Button choose = new Button(this);
+        choose.setText(R.string.btn_choose);
+        choose.setAllCaps(false);
+        choose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDownloaderPicker();
+            }
+        });
+        targetRow.addView(choose);
+        card.addView(targetRow);
+
+        card.addView(UiKit.hint(this, getString(R.string.settings_target_hint)));
+        return card;
+    }
+
+    private View logCard() {
+        LinearLayout card = UiKit.card(this);
+        card.addView(UiKit.sectionTitle(this, getString(R.string.section_log)));
+
+        Button open = new Button(this);
+        open.setText(R.string.log_open);
+        open.setAllCaps(false);
+        open.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, LogActivity.class));
+            }
+        });
+
+        Button clear = new Button(this);
+        clear.setText(R.string.log_clear);
+        clear.setAllCaps(false);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogActivity.clearLog(MainActivity.this);
+                toast(getString(R.string.toast_log_cleared));
+            }
+        });
+        card.addView(UiKit.buttonRow(this, open, clear));
+        card.addView(UiKit.hint(this, getString(R.string.log_hint)));
+        return card;
+    }
+
+    private View aboutCard() {
+        LinearLayout card = UiKit.card(this);
+        card.addView(UiKit.sectionTitle(this, getString(R.string.section_about)));
+        card.addView(UiKit.hint(this, getString(R.string.about_text)));
+        return card;
+    }
+
+    // ------------------------------------------------------------------ state
+
+    private void refresh() {
+        boolean active = ModulePrefs.isActive(this);
+        long last = ModulePrefs.lastReportTime(this);
+
+        if (statusValue != null) {
+            statusValue.setText(active ? R.string.status_active : R.string.status_inactive);
+            statusValue.setTextColor(active ? 0xFF2E7D32 : 0xFFC62828);
+        }
+        if (statusDetail != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(getString(R.string.status_version, moduleVersion())).append('\n');
+            if (ModulePrefs.everReported(this)) {
+                String process = ModulePrefs.lastProcess(this);
+                sb.append(getString(R.string.status_last_inject, formatTime(last),
+                        process == null || process.length() == 0 ? "-" : process)).append('\n');
+                String framework = ModulePrefs.lastFramework(this);
+                if (framework != null && framework.length() > 0) {
+                    sb.append(getString(R.string.status_framework, framework)).append('\n');
+                }
+                String state = ModulePrefs.lastState(this);
+                if ("hook_failed".equals(state)) {
+                    sb.append(getString(R.string.status_hook_failed));
+                } else if ("inject".equals(state)) {
+                    sb.append(getString(R.string.status_hook_ok));
+                }
+            } else {
+                sb.append(getString(R.string.status_never_title)).append('\n')
+                        .append(getString(R.string.status_step1)).append('\n')
+                        .append(getString(R.string.status_step2)).append('\n')
+                        .append(getString(R.string.status_step3)).append('\n')
+                        .append(getString(R.string.status_step4));
+            }
+            if (active && !ModulePrefs.isEnabled(this)) {
+                sb.append('\n').append(getString(R.string.status_disabled_hint));
+            }
+            statusDetail.setText(sb.toString());
+        }
+        if (scopeValue != null) {
+            scopeValue.setText(R.string.scope_text);
+        }
+        if (downloaderValue != null) {
+            String id = ModulePrefs.downloader(this);
+            String custom = ModulePrefs.customPackage(this);
+            String label = Downloaders.labelOf(id, custom);
+            Downloaders.Entry entry = Downloaders.byId(id);
+            String pkg = entry != null ? entry.pkg
+                    : (Downloaders.ID_CUSTOM.equals(id) && custom.length() > 0 ? custom : null);
+            if (pkg != null && pkg.length() > 0) {
+                label += getString(Downloaders.isInstalled(this, pkg)
+                        ? R.string.picker_installed : R.string.picker_missing);
+            }
+            downloaderValue.setText(getString(R.string.settings_target_current, label));
+        }
+    }
+
+    private String moduleVersion() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return info.versionName + " (" + info.versionCode + ")";
+        } catch (Throwable t) {
+            return BuildInfo.VERSION;
+        }
+    }
+
+    private static String formatTime(long millis) {
+        if (millis <= 0) return "-";
+        return new SimpleDateFormat("MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(millis));
+    }
+
+    // ------------------------------------------------------------------ downloader picker
+
+    private void showDownloaderPicker() {
+        final List<Downloaders.Entry> entries = Downloaders.all();
+        final List<String> labels = new ArrayList<String>();
+        final List<String> ids = new ArrayList<String>();
+        String current = ModulePrefs.downloader(this);
+
+        for (Downloaders.Entry entry : entries) {
+            String label = entry.label();
+            if (entry.pkg != null) {
+                label += getString(Downloaders.isInstalled(this, entry.pkg)
+                        ? R.string.picker_installed : R.string.picker_missing);
+            }
+            if (entry.id.equals(current)) label = "✓ " + label;
+            labels.add(label);
+            ids.add(entry.id);
+        }
+        String custom = ModulePrefs.customPackage(this);
+        labels.add(getString(R.string.picker_custom,
+                custom.length() == 0 ? getString(R.string.picker_custom_unset) : custom));
+        ids.add(Downloaders.ID_CUSTOM);
+
+        new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle(R.string.picker_title)
+                .setItems(labels.toArray(new String[0]), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String id = ids.get(which);
+                        if (Downloaders.ID_CUSTOM.equals(id)) {
+                            askCustomPackage();
+                        } else {
+                            ModulePrefs.setDownloader(MainActivity.this, id);
+                            refresh();
+                            toast(getString(R.string.toast_target_changed));
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
+
+    private void askCustomPackage() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint(R.string.custom_hint);
+        input.setText(ModulePrefs.customPackage(this));
+
+        new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle(R.string.custom_title)
+                .setView(input)
+                .setPositiveButton(R.string.btn_save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String pkg = input.getText().toString().trim();
+                        ModulePrefs.setCustomPackage(MainActivity.this, pkg);
+                        if (pkg.length() > 0) {
+                            ModulePrefs.setDownloader(MainActivity.this, Downloaders.ID_CUSTOM);
+                            if (!Downloaders.isInstalled(MainActivity.this, pkg)) {
+                                toast(getString(R.string.toast_custom_keep));
+                            }
+                        }
+                        refresh();
+                    }
+                })
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
+
+    private void toast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+}

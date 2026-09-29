@@ -1,0 +1,13 @@
+N: android=http://schemas.android.com/apk/res/android (line=0)
+  E: manifest (line=0)
+    A: http://schemas.android.com/apk/res/android:versionCode(0x0101021b)=423404923
+    A: http://schemas.android.com/apk/res/android:splitTypes(0x0101064f)=""
+    A: package="com.microsoft.emmx" (Raw: "com.microsoft.emmx")
+    A: split="config.zh" (Raw: "config.zh")
+      E: application (line=0)
+        A: http://schemas.android.com/apk/res/android:hasCode(0x0101000c)=false
+          E: meta-data (line=0)
+            A: http://schemas.android.com/apk/res/android:name(0x01010003)="com.android.vending.derived.apk.id" (Raw: "com.android.vending.derived.apk.id")
+            A: http://schemas.android.com/apk/res/android:value(0x01010024)=2
+      E: uses-sdk (line=0)
+        A: http://schemas.android.com/apk/res/android:minSdkVersion(0x0101020c)=32

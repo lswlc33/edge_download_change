@@ -1,0 +1,174 @@
+
+########## Lorg/chromium/url/GURL;  (in base/classes4.dex)  access=0x1 super=Ljava/lang/Object;
+--- fields ---
+  a : Ljava/lang/String;  access=0x1
+  b : Z  access=0x1
+  c : Lorg/chromium/url/Parsed;  access=0x1
+--- methods ---
+  <init>()V access=0x10001
+  <init>(Ljava/lang/String;)V access=0x10001
+  a(Ljava/lang/String;)Lorg/chromium/url/GURL; access=0x9
+  b(Ljava/lang/String;)Lorg/chromium/url/GURL; access=0x9
+  c()V access=0x9
+  emptyGURL()Lorg/chromium/url/GURL; access=0x9
+  l(Lorg/chromium/url/GURL;)Z access=0x9
+  d(I I)Ljava/lang/String; access=0x11
+  e()Ljava/lang/String; access=0x11
+  equals(Ljava/lang/Object;)Z access=0x11
+  f()Lorg/chromium/url/GURL; access=0x1
+  g()Ljava/lang/String; access=0x11
+  h()Ljava/lang/String; access=0x11
+  hashCode()I access=0x11
+  i()Ljava/lang/String; access=0x11
+  init(Ljava/lang/String; Z Lorg/chromium/url/Parsed;)V access=0x11
+  j()Ljava/lang/String; access=0x11
+  k()Ljava/lang/String; access=0x11
+  m()Ljava/lang/String; access=0x11
+  n()Lzsa0; access=0x11
+  toNativeGURL(J J)V access=0x11
+  toString()Ljava/lang/String; access=0x1
+
+########## Lorg/chromium/chrome/browser/download/DownloadController;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  a : Lum1;  access=0x19
+--- methods ---
+  <clinit>()V access=0x10008
+  enqueueAndroidDownloadManagerRequest(Lorg/chromium/url/GURL; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Lorg/chromium/url/GURL;)V access=0x9
+  onDownloadCancelled(Lorg/chromium/chrome/browser/download/DownloadInfo;)V access=0x9
+  onDownloadCompleted(Lorg/chromium/chrome/browser/tab/Tab; Lorg/chromium/chrome/browser/download/DownloadInfo; Z)V access=0x9
+  onDownloadUpdated(Lorg/chromium/chrome/browser/download/DownloadInfo;)V access=0x9
+  onPdfDownloadStarted(Lorg/chromium/chrome/browser/tab/Tab; Lorg/chromium/chrome/browser/download/DownloadInfo;)V access=0x9
+
+########## Lorg/chromium/chrome/browser/download/DownloadDialogBridge;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  a : J  access=0x1
+  b : Lnad;  access=0x1
+  c : Lorg/chromium/ui/base/WindowAndroid;  access=0x1
+  d : I  access=0x1
+  e : Ljava/lang/String;  access=0x1
+  f : Lorg/chromium/chrome/browser/profiles/Profile;  access=0x1
+  g : Z  access=0x1
+--- methods ---
+  a(Lorg/chromium/chrome/browser/profiles/Profile;)Ljava/lang/String; access=0x9
+  b(Lorg/chromium/chrome/browser/profiles/Profile;)I access=0x9
+  create(J)Lorg/chromium/chrome/browser/download/DownloadDialogBridge; access=0x9
+  f(Lorg/chromium/chrome/browser/profiles/Profile; Ljava/lang/String;)V access=0x9
+  g(I Lorg/chromium/chrome/browser/profiles/Profile;)V access=0x9
+  c()V access=0x11
+  d(Ljava/lang/String; Z)V access=0x11
+  destroy()V access=0x11
+  e()V access=0x11
+  showDialog(Lorg/chromium/ui/base/WindowAndroid; J I I Ljava/lang/String; Lorg/chromium/chrome/browser/profiles/Profile; Z)V access=0x11
+
+########## Lorg/chromium/chrome/browser/download/DownloadInfo;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  a : Lorg/chromium/url/GURL;  access=0x1
+  b : Ljava/lang/String;  access=0x1
+  c : Ljava/lang/String;  access=0x1
+  d : Ljava/lang/String;  access=0x1
+  e : Ljava/lang/String;  access=0x1
+  f : Ljava/lang/String;  access=0x1
+  g : Ljava/lang/String;  access=0x1
+  h : Lorg/chromium/url/GURL;  access=0x1
+  i : Lorg/chromium/url/GURL;  access=0x1
+  j : J  access=0x1
+  k : J  access=0x1
+  l : Ljava/lang/String;  access=0x1
+  m : Lo0u;  access=0x1
+  n : J  access=0x1
+  o : Z  access=0x1
+  p : Lorg/chromium/chrome/browser/profiles/OtrProfileId;  access=0x1
+  q : I  access=0x1
+  r : I  access=0x1
+  s : Lv89;  access=0x1
+  t : Z  access=0x1
+  u : Z  access=0x1
+  v : Landroid/graphics/Bitmap;  access=0x1
+  w : I  access=0x1
+  x : I  access=0x1
+  y : Z  access=0x1
+  z : I  access=0x1
+--- methods ---
+  a(Lorg/chromium/components/offline_items_collection/OfflineItem; Lorg/chromium/components/offline_items_collection/OfflineItemVisuals;)Lorg/chromium/chrome/browser/download/DownloadInfo; access=0x9
+  createDownloadInfo(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Lorg/chromium/url/GURL; Ljava/lang/String; J J Lorg/chromium/chrome/browser/profiles/OtrProfileId; I I Z Z Z Z Lorg/chromium/url/GURL; Lorg/chromium/url/GURL; J J I Z I Z Z I)Lorg/chromium/chrome/browser/download/DownloadInfo; access=0x9
+
+########## Lorg/chromium/chrome/browser/download/DownloadItem;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  a : Lv89;  access=0x11
+  b : Z  access=0x11
+  c : Lorg/chromium/chrome/browser/download/DownloadInfo;  access=0x11
+  d : J  access=0x1
+--- methods ---
+  <init>(Z Lorg/chromium/chrome/browser/download/DownloadInfo;)V access=0x10001
+  createDownloadItem(Lorg/chromium/chrome/browser/download/DownloadInfo; J J Z)Lorg/chromium/chrome/browser/download/DownloadItem; access=0x9
+  a()Ljava/lang/String; access=0x11
+
+########## Lorg/chromium/chrome/browser/download/DownloadManagerService;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  h : Ljava/util/HashSet;  access=0x19
+  i : Lorg/chromium/chrome/browser/download/DownloadManagerService;  access=0x9
+  a : Ljava/util/HashMap;  access=0x1
+  b : Lsg60;  access=0x1
+  c : Landroid/os/Handler;  access=0x1
+  d : Ljxt;  access=0x1
+  e : Lzcd;  access=0x1
+  f : Lacd;  access=0x1
+  g : J  access=0x1
+--- methods ---
+  <clinit>()V access=0x10008
+  a()Lorg/chromium/chrome/browser/download/DownloadManagerService; access=0x9
+  b(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; J Z Ljava/lang/String;)Landroid/content/Intent; access=0x9
+  onDownloadItemCanceled(Lorg/chromium/chrome/browser/download/DownloadItem; Z)V access=0x9
+  openDownloadsPage(Lorg/chromium/chrome/browser/profiles/OtrProfileId; I)V access=0x9
+  addDownloadItemToList(Ljava/util/List; Lorg/chromium/chrome/browser/download/DownloadItem;)V access=0x11
+  addDownloadObserver(Lnbd;)V access=0x11
+  broadcastDownloadAction(Lorg/chromium/chrome/browser/download/DownloadItem; Ljava/lang/String;)V access=0x11
+  c()J access=0x11
+  createDownloadItemList()Ljava/util/List; access=0x11
+  d(Lorg/chromium/chrome/browser/download/DownloadItem; I)V access=0x11
+  f(Lorg/chromium/chrome/browser/profiles/Profile;)V access=0x11
+  getAllDownloads(Lorg/chromium/chrome/browser/profiles/OtrProfileId;)V access=0x11
+  h(Lorg/chromium/chrome/browser/profiles/Profile;)V access=0x11
+  isDownloadOpenableInBrowser(Ljava/lang/String; Z)Z access=0x11
+  onAllDownloadsRetrieved(Ljava/util/List; Lorg/chromium/chrome/browser/profiles/ProfileKey;)V access=0x11
+  onDownloadItemCreated(Lorg/chromium/chrome/browser/download/DownloadItem;)V access=0x11
+  onDownloadItemRemoved(Ljava/lang/String;)V access=0x11
+  onDownloadItemUpdated(Lorg/chromium/chrome/browser/download/DownloadItem;)V access=0x11
+  onResumptionFailed(Ljava/lang/String;)V access=0x11
+  openDownloadItem(Lorg/chromium/chrome/browser/download/DownloadItem; I)V access=0x11
+  removeDownload(Ljava/lang/String; Lorg/chromium/chrome/browser/profiles/OtrProfileId; Z)V access=0x11
+  removeDownloadObserver(Lnbd;)V access=0x11
+  updateLastAccessTime(Ljava/lang/String; Lorg/chromium/chrome/browser/profiles/OtrProfileId;)V access=0x11
+
+########## Lorg/chromium/chrome/browser/download/EdgeOneDriveDownloadBridge;  (in chrome/classes.dex)  access=0x11 super=Ljava/lang/Object;
+--- fields ---
+  a : J  access=0x1
+  b : Ljava/lang/String;  access=0x1
+  c : Z  access=0x1
+--- methods ---
+  a(I Z)I access=0x9
+  create(J)Lorg/chromium/chrome/browser/download/EdgeOneDriveDownloadBridge; access=0x9
+  b(Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String; Z)V access=0x11
+  destroy()V access=0x11
+  isAADAndAPPProtected()Z access=0x11
+  notifyDownloadFinished(Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; J Z I)V access=0x11
+  notifyDownloadStarted(Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String;)V access=0x11
+  notifyUploadFinished(Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String; Z I)V access=0x11
+  notifyUploadStarted(Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String;)V access=0x11
+  queryUserChoice(Ljava/lang/String; Lorg/chromium/chrome/browser/tab/Tab; Ljava/lang/String; Z J Ljava/lang/String;)V access=0x11
+  setOneDriveFolderInfo(Z Ljava/lang/String;)V access=0x11
+
+########## Lorg/chromium/chrome/browser/profiles/OtrProfileId;  (in chrome/classes.dex)  access=0x1 super=Ljava/lang/Object;
+--- fields ---
+  b : Lorg/chromium/chrome/browser/profiles/OtrProfileId;  access=0x19
+  a : Ljava/lang/String;  access=0x11
+--- methods ---
+  <clinit>()V access=0x10008
+  <init>(Ljava/lang/String;)V access=0x10001
+  a(Ljava/lang/String;)Lorg/chromium/chrome/browser/profiles/OtrProfileId; access=0x9
+  deserializeWithoutVerify(Ljava/lang/String;)Lorg/chromium/chrome/browser/profiles/OtrProfileId; access=0x9
+  serialize(Lorg/chromium/chrome/browser/profiles/OtrProfileId;)Ljava/lang/String; access=0x9
+  equals(Ljava/lang/Object;)Z access=0x11
+  getProfileId()Ljava/lang/String; access=0x11
+  hashCode()I access=0x11
+  toString()Ljava/lang/String; access=0x11

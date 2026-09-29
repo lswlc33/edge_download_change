@@ -1,0 +1,19 @@
+# Keep line endings deterministic: LF in the repository and in the working copy
+# (shell scripts and the Gradle-free build must not get CRLF).
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.py   text eol=lf
+*.java text eol=lf
+*.xml  text eol=lf
+*.yml  text eol=lf
+*.md   text eol=lf
+*.prop text eol=lf
+*.list text eol=lf
+
+# binaries
+*.apk  binary
+*.jar  binary
+*.keystore binary
+*.jks  binary
+*.png  binary
