@@ -102,3 +102,50 @@ Verified on Edge 153.0.4234.49 (com.microsoft.emmx). Static scope: com.microsoft
   `SIGNING_KEYSTORE_BASE64` / `SIGNING_STORE_PASSWORD` / `SIGNING_KEY_ALIAS` / `SIGNING_KEY_PASSWORD`；
   本地构建时使用 `lsp_module/module.keystore`（密码 `edgesysdl`）。**丢失密钥 = 用户无法覆盖升级**。
 - **能否同时发到 Coolapk/酷安等？** 可以，但那些渠道与官方仓库无关，官方仓库只认上面的规则。
+
+## 六、官方是怎么"同步"你的仓库的（实证调查）
+
+我直接查了官方仓库（`Xposed-Modules-Repo/com.tsng.hidemyapplist`，即 HMA 模块）与官网数据，结论如下：
+
+**1. 元数据不是自动同步的。** 官方仓库里的 `SOURCE_URL` / `SUMMARY` / `README.md` 提交历史停在
+**2021 年**，作者是模块开发者（`Dr-TSNG`）和维护者（`Nullptr`）——这部分由官方建库时写入，之后基本不动。
+
+**2. Release/APK 由官方侧的自动化同步。** 证据链：
+- 官方仓库里 release 的 **tag 对象 tagger = `github-actions[bot]`**，而 **release 作者 = 维护者账号 `aviraxp`**；
+- 但该模块仓库**没有任何 workflow、也没有 Actions 运行记录**（`actions/workflows` 与 `actions/runs` 均为 0），
+  组织 `.github` 仓库里也没有 workflow。
+
+→ 也就是说：同步逻辑跑在**官方自己的基础设施/账号**上（读你仓库的 release、在组织仓库建 tag/release），
+**不是**由你的仓库触发的，你也不需要为同步做任何配置。官方原话那句
+"The bot will help you to correct the tag name" 说的就是这个机器人。
+
+**3. 分发走官方 CDN。** 组织仓库的 release 资产通过 `assets.lsposed.org` 代理分发，形如
+`https://assets.lsposed.org/Xposed-Modules-Repo/<包名>/releases/download/<tag>/<文件名>.apk`
+（带签名与时效参数）——设备上 LSPosed 管理器/网站就是从这里下载的。
+
+**4. 官网/管理器看到的数据字段**（`modules.lsposed.org` 首页内嵌索引，实测样本 30 个模块）：
+
+| 字段 | 来源 |
+|---|---|
+| `name` | 组织仓库名 = **模块包名** |
+| `description` | 组织仓库的 **description**（= 模块名称） |
+| `summary` | 组织仓库的 **`SUMMARY` 文件**（一句话简介） |
+| `sourceUrl` | 组织仓库的 **`SOURCE_URL` 文件**（你的仓库） |
+| `latestRelease` | 组织仓库里最新的**稳定 release 的 tag**，格式 `版本号-版本名`（样本 30/30 全部符合） |
+| `latestBetaRelease` | versionName 带 `alpha`/`beta` 的 release（实测 tag 例：`2-1.0.2-alpha.1`、`3-0.2.0-beta.2`） |
+| `latestSnapshotRelease` | 快照通道（样本中暂无模块使用） |
+
+### 对发版的实际影响（务必遵守）
+
+1. **只在你的仓库发 Release**，不要尝试往组织仓库推东西（你也没有权限）。
+2. tag 一定用 `版本号-版本名`（本项目的 `release.yml` 已保证）。
+3. **需要"测试通道"时**：把 versionName 写成带 `alpha`/`beta` 的形式（如 `2.5-beta.1`）并用规范 tag 发
+   release，官方会归入 **beta 通道**。当前的 `nightly`（tag 固定为 `nightly`）**不满足** `版本号-版本名`，
+   因此不会被官方识别，只适合自测。
+4. **只替换 Release 附件不触发同步**（官方明确说明），必须"新建 Release 或改动 Release 内容"。
+5. 组织仓库的 **description = 模块显示名**、**SUMMARY = 简介**：提交申请时把这两项写清楚
+   （description 建议就是 `edge_download_change`，summary 一句话说明用途）。
+6. **包名与"品牌"风险**：`com.edge.systemdownload` 不含自有域名 → 走人工审核，审阅者也可能对
+   `com.edge.*`（冒充 Microsoft Edge 品牌）有顾虑。官方样本里 15/30 使用 `io.github.<用户名>.*`
+   形式（如 `io.github.xiaotong6666.fusehide`）。若想换成 `io.github.lswlc33.edge_download_change`，
+   **现在是最便宜的时机**（尚未提交；代价是设备上要卸载 v2.4 再装新包名版本，签名可保持不变）。
