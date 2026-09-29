@@ -1,5 +1,9 @@
 # edge_download_change
 
+[![Nightly](https://github.com/lswlc33/edge_download_change/actions/workflows/nightly.yml/badge.svg)](https://github.com/lswlc33/edge_download_change/actions/workflows/nightly.yml)
+[![Release](https://github.com/lswlc33/edge_download_change/actions/workflows/release.yml/badge.svg)](https://github.com/lswlc33/edge_download_change/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/lswlc33/edge_download_change?display_name=tag)](https://github.com/lswlc33/edge_download_change/releases/latest)
+
 An LSPosed module that replaces **Microsoft Edge for Android**'s (`com.microsoft.emmx`)
 download confirmation dialog with its own **Copy / Download** dialog, and hands the
 download over to the **system DownloadManager** (or a third-party downloader app) instead
@@ -42,7 +46,11 @@ Requirements: a rooted device with a framework supporting **libxposed API 102** 
 
 ## Usage
 
-1. **Install** `lsp_module/edge_download_change-2.4.apk` (or build it: `bash lsp_module/build.sh`).
+1. **Install**:
+   - **stable**: grab the newest APK from [Releases](https://github.com/lswlc33/edge_download_change/releases/latest) (tag looks like `6-2.4`);
+   - **bleeding edge**: the [nightly pre-release](https://github.com/lswlc33/edge_download_change/releases/tag/nightly) is rebuilt on every push;
+   - or build locally: `bash lsp_module/build.sh` (artifact `edge_download_change-<version>.apk`).
+   All channels use the same signing key, so they can be installed over each other.
 2. **Enable** the module in your Xposed/LSPosed manager. The scope `com.microsoft.emmx` is
    declared statically by the module; if your manager ignores static scopes, check Edge manually.
 3. **Restart Edge**: force-stop it (switching to background is not enough) and open it again.
@@ -90,6 +98,18 @@ Version-specific gotchas (documented in `lsp_module/README.md`): `GURL.toString(
 overridden in Edge 153 (read the field `a`), restored history items must be filtered with
 `j == 0 && q == 0`, and only `Activity.onResume` is hooked to keep the framework-hook footprint
 minimal.
+
+## Downloads & updates
+
+| Channel | Content | Trigger |
+|---|---|---|
+| **Release (stable)** | stable builds, tag = `<versionCode>-<versionName>` as required by the official module repository | Actions → **Release** → Run workflow |
+| **Nightly (pre-release)** | rebuilt on every push to `main`, file name carries the short SHA | automatic |
+| **LSPosed repository** | distribution through the official module repo, installable/updatable from the LSPosed manager | see [publishing guide](docs/publish-to-lsposed-repo.md) (Chinese) |
+
+Builds run on GitHub Actions and are signed with the key stored in the repository secrets
+(`SIGNING_KEYSTORE_BASE64` …), so **every build has the same signature** and installs over the
+previous one. Local builds use `lsp_module/module.keystore` (the same key).
 
 ## Repository layout
 

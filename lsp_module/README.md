@@ -229,8 +229,31 @@ lsp_module/
 
 ```bash
 # 依赖：JDK 17、Android SDK（platforms;android-35、build-tools;35.0.0）、python3
-bash build.sh          # 产物：edge_download_change-2.4.apk（已签名）
+bash build.sh                       # 产物：edge_download_change-<versionName>.apk（已签名）
+APK_SUFFIX=-nightly-abc1234 bash build.sh   # 自定义后缀（CI 的 nightly 用）
 ```
 
-`module.keystore` 是本地自签名密钥，用于让多个版本能覆盖安装；如需公开发布请换成自己的密钥。
+- 脚本跨平台：Windows Git Bash / Linux / macOS 均可；SDK 路径依次取
+  `ANDROID_SDK_ROOT` → `ANDROID_HOME` → Windows 默认目录 → `~/Android/Sdk` / `~/Library/Android/sdk`。
+- **签名**优先读环境变量，其次用本地 `module.keystore`：
+
+  | 变量 | 说明 |
+  |---|---|
+  | `SIGNING_KEYSTORE_BASE64` | base64 编码的 keystore（GitHub Actions Secrets 用） |
+  | `SIGNING_KEYSTORE_FILE` | keystore 文件路径（默认 `module.keystore`） |
+  | `SIGNING_STORE_PASSWORD` / `SIGNING_KEY_ALIAS` / `SIGNING_KEY_PASSWORD` | 密码 / 别名（默认 `edgesysdl`） |
+
+- 仓库**不包含**密钥文件（见根目录 `.gitignore`）：CI 用 Secrets，本地用 `module.keystore`。
+  **请备份密钥**——丢失后已发布版本无法被覆盖安装。
+
+## 持续集成与发布
+
+| 工作流 | 触发 | 产物 |
+|---|---|---|
+| `.github/workflows/nightly.yml` | push 到 `main` / 手动 | 预发布 `nightly`（tag 固定 `nightly`，文件名含短 SHA） |
+| `.github/workflows/release.yml` | 手动，输入 `version`（须等于 `android:versionName`） | 正式 Release，**tag = `<versionCode>-<versionName>`**（官方模块仓库要求） |
+
+发版步骤：递增 `AndroidManifest.xml` 的 `versionCode`/`versionName`（并同步 `BuildInfo.VERSION`）→ push →
+Actions → Release → Run workflow。发布到 LSPosed 官方仓库的完整流程见
+根目录 [`docs/publish-to-lsposed-repo.md`](../docs/publish-to-lsposed-repo.md)。
 另见仓库根目录的 `README.md`（中文说明）/ `README.en.md`（English）与 `analysis/README.md`（hook 目标的推导过程）。

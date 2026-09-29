@@ -1,5 +1,9 @@
 # edge_download_change
 
+[![Nightly](https://github.com/lswlc33/edge_download_change/actions/workflows/nightly.yml/badge.svg)](https://github.com/lswlc33/edge_download_change/actions/workflows/nightly.yml)
+[![Release](https://github.com/lswlc33/edge_download_change/actions/workflows/release.yml/badge.svg)](https://github.com/lswlc33/edge_download_change/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/lswlc33/edge_download_change?display_name=tag)](https://github.com/lswlc33/edge_download_change/releases/latest)
+
 把 **Microsoft Edge for Android**（`com.microsoft.emmx`）的下载确认弹窗，换成模块自己的
 **「复制 / 下载」**对话框，并让下载交给**系统下载器**（Android DownloadManager）或你选定的
 **第三方下载器**，而不是 Edge 自带的下载管理器。
@@ -43,7 +47,11 @@ Edge 安卓版是个好浏览器，但它的**下载管理器一直比较弱**�
 **前置条件**：Android 8.0+；支持 libxposed API 102 的 Xposed 框架（LSPosed 等）；
 Edge for Android（`com.microsoft.emmx`）。
 
-1. **安装模块**：安装 `lsp_module/edge_download_change-2.4.apk`（或自行 `bash lsp_module/build.sh` 构建）。
+1. **安装模块**：
+   - **稳定版**：从 [Releases](https://github.com/lswlc33/edge_download_change/releases/latest) 下载最新 APK（tag 形如 `6-2.4`）；
+   - **尝鲜版**：从 [Nightly 预发布](https://github.com/lswlc33/edge_download_change/releases/tag/nightly) 下载每次推送自动构建的 APK；
+   - 或本地构建：`bash lsp_module/build.sh`（产物 `edge_download_change-<版本>.apk`）。
+   两种渠道都用同一把密钥签名，可以互相覆盖安装。
 2. **启用模块**：在 LSPosed 管理器里启用本模块。作用域 `com.microsoft.emmx` 已由模块**静态声明**，
    多数管理器会自动应用；如果你的管理器不识别静态作用域，请手动勾选 Edge。
 3. **重启 Edge**：**强制停止** Edge（只切后台不算），再重新打开。
@@ -97,6 +105,17 @@ Edge 是 Chromium 内核，**下载引擎在 native 层**，Java 侧只是桥接
 `GURL` 在 Edge 153 **没有重写 `toString()`**，URL 必须读实例字段 `a`；
 恢复的历史下载项 URL 为空且 `j=0`，只能用 `j==0 && q==0` 区分"新下载"；
 框架 hook 只保留 `Activity.onResume`（最热路径上的 hook 已移除，降低崩溃风险）。
+
+## 下载与更新
+
+| 渠道 | 内容 | 触发方式 |
+|---|---|---|
+| **Release（稳定版）** | 手动发布的稳定版，tag = `版本号-版本名`（官方模块仓库要求的格式） | Actions → **Release** → Run workflow |
+| **Nightly（预发布）** | 每次 push 到 `main` 自动构建，文件名带短 SHA | 自动（也可手动触发） |
+| **LSPosed 仓库** | 通过官方模块仓库分发，可在 LSPosed 管理器「仓库」页直接安装/更新 | 见 [发布指引](docs/publish-to-lsposed-repo.md) |
+
+构建由 GitHub Actions 完成，签名密钥存放在仓库 Secrets（`SIGNING_KEYSTORE_BASE64` 等），
+因此**每次构建的签名一致**，可以覆盖安装。本地构建默认使用 `lsp_module/module.keystore`（同一把密钥）。
 
 ## 项目结构
 
