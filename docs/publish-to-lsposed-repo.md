@@ -150,3 +150,17 @@ Verified on Edge 153.0.4234.49 (com.microsoft.emmx). Static scope: com.microsoft
    `com.edge.*`（冒充 Microsoft Edge 品牌）有顾虑。官方样本里 15/30 使用 `io.github.<用户名>.*`
    形式（如 `io.github.xiaotong6666.fusehide`）。若想换成 `io.github.lswlc33.edge_download_change`，
    **现在是最便宜的时机**（尚未提交；代价是设备上要卸载 v2.4 再装新包名版本，签名可保持不变）。
+
+## 七、当前提交状态（2026-09-29）
+
+- **申请 Issue：<https://github.com/Xposed-Modules-Repo/submission/issues/1968>**（`[New Package] io.github.lswlc33.edge_download_change`，OPEN，等待官方审核）
+- 已满足的前置条件：
+  - 仓库描述非空（模块名）✓
+  - 稳定版 Release **`8-2.6`**（tag = 版本号-版本名，带 APK）✓
+  - beta 通道：**`8-2.6-beta.9`**（versionName `2.6-beta.9`，pre-release）✓
+  - 每次构建同签名（证书 SHA-256 `9064aa71…`）✓
+- **审核通过后**：官方会创建 `Xposed-Modules-Repo/io.github.lswlc33.edge_download_change`（含 `SOURCE_URL` / `SUMMARY` / `README.md`），
+  之后你只需继续在自己的仓库发版：
+  - 稳定版：Actions → **Release** → 填 `version`（等于 `android:versionName`）；
+  - beta：**每次 push 到 main 自动发布**（`-beta.<运行号>`，官方归入 beta 通道）。
+- 若官方在 Issue 里提出修改要求，按需调整后在本仓库重新发版即可（tag 规则不要变）。
