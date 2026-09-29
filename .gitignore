@@ -10,6 +10,11 @@ lsp_module/build/
 *.keystore
 *.jks
 
+# Built module APKs are distributed through GitHub Releases, never committed
+# (a stale committed APK once shadowed the fresh build in CI).
+*.apk
+*.apk.idsig
+
 # Input APKs and extracted/derived analysis data
 *.apks
 apks_extracted/

@@ -36,27 +36,34 @@ jobs:
           sdkmanager --install "platforms;android-35" "build-tools;35.0.0" | tail -3
 
       - name: Build signed APK
+        id: build
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
-          # The suffix must be set in this very step (GITHUB_ENV only affects later steps).
-          APK_SUFFIX="-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)" bash lsp_module/build.sh
+          # The suffix must be set in this very step (GITHUB_ENV only affects later steps),
+          # and the artifact path comes from the build output instead of a glob so a stale
+          # file can never be picked up.
+          export APK_SUFFIX="-nightly-$(echo "${GITHUB_SHA}" | cut -c1-7)"
+          APK="$(bash lsp_module/build.sh | sed -n 's/^done: //p' | tail -1)"
+          test -f "lsp_module/$APK" || { echo "::error::build artifact not found: $APK"; exit 1; }
+          echo "apk=lsp_module/$APK" >> "$GITHUB_OUTPUT"
+          echo "built: $APK"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: nightly-apk
-          path: lsp_module/edge_download_change-*.apk
+          path: ${{ steps.build.outputs.apk }}
           if-no-files-found: error
 
       - name: Publish rolling pre-release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          APK="$(ls lsp_module/edge_download_change-*.apk | head -1)"
+          APK="${{ steps.build.outputs.apk }}"
           NOTES="Automated nightly build.
 
           - commit: \`${GITHUB_SHA}\`
