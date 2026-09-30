@@ -1,16 +1,35 @@
 package io.github.lswlc33.edge_download_change;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/** Small helpers for building a themed, card based UI without any library dependency. */
+/**
+ * Visual system for the module app: a deliberately dark, GitHub-inspired look with
+ * rounded cards, pill badges and two button styles. Everything is drawn with
+ * GradientDrawable/RippleDrawable so no image assets or libraries are needed.
+ */
 final class UiKit {
+
+    private static final int CARD = 0xFF161B22;
+    private static final int STROKE = 0xFF30363D;
+    private static final int TEXT = 0xFFE6EDF3;
+    private static final int TEXT_DIM = 0xFF8B949E;
+    private static final int ACCENT = 0xFF4493F8;
+    private static final int ACCENT_DEEP = 0xFF1F6FEB;
+    private static final int OK = 0xFF3FB950;
+    private static final int BAD = 0xFFF85149;
+    private static final int BTN = 0xFF21262D;
 
     private UiKit() {}
 
@@ -18,45 +37,18 @@ final class UiKit {
         return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
 
-    /** Resolves a theme attribute color, falling back to the given default. */
-    static int themeColor(Context context, int attr, int fallback) {
-        TypedValue value = new TypedValue();
-        if (!context.getTheme().resolveAttribute(attr, value, true)) return fallback;
-        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
-                && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            return value.data;
+    static int color(Context context, int resId) {
+        return context.getResources().getColor(resId, context.getTheme());
+    }
+
+    private static GradientDrawable round(Context context, int fillColor, int radiusDp, int strokeColor) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(fillColor);
+        d.setCornerRadius(dp(context, radiusDp));
+        if (strokeColor != 0) {
+            d.setStroke(dp(context, 1), strokeColor);
         }
-        if (value.resourceId != 0) {
-            // Theme text colors are usually ColorStateLists, not plain colors.
-            try {
-                android.content.res.ColorStateList list = context.getResources()
-                        .getColorStateList(value.resourceId, context.getTheme());
-                if (list != null) return list.getDefaultColor();
-            } catch (Throwable ignored) {
-            }
-            try {
-                return context.getResources().getColor(value.resourceId);
-            } catch (Throwable ignored) {
-            }
-        }
-        return fallback;
-    }
-
-    static int textPrimary(Context context) {
-        return themeColor(context, android.R.attr.textColorPrimary, Color.BLACK);
-    }
-
-    static int textSecondary(Context context) {
-        return themeColor(context, android.R.attr.textColorSecondary, Color.GRAY);
-    }
-
-    static int accent(Context context) {
-        return themeColor(context, android.R.attr.colorAccent, 0xFF0F6CBD);
-    }
-
-    static int cardBackground(Context context) {
-        int floating = themeColor(context, android.R.attr.colorBackgroundFloating, 0xFFF2F2F2);
-        return floating;
+        return d;
     }
 
     static LinearLayout content(Context context) {
@@ -69,11 +61,7 @@ final class UiKit {
     static LinearLayout card(Context context) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(cardBackground(context));
-        background.setCornerRadius(dp(context, 14));
-        background.setStroke(dp(context, 1), blend(cardBackground(context), textSecondary(context), 0.25f));
-        card.setBackground(background);
+        card.setBackground(round(context, color(context, R.color.card), 16, color(context, R.color.stroke)));
         card.setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14));
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -82,12 +70,16 @@ final class UiKit {
         return card;
     }
 
+    /** Small uppercase section header with letter spacing. */
     static TextView sectionTitle(Context context, String text) {
         TextView view = new TextView(context);
         view.setText(text);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        view.setTextColor(accent(context));
-        view.setPadding(0, 0, 0, dp(context, 8));
+        view.setAllCaps(true);
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        view.setTypeface(Typeface.DEFAULT_BOLD);
+        view.setLetterSpacing(0.08f);
+        view.setTextColor(color(context, R.color.accent));
+        view.setPadding(0, 0, 0, dp(context, 10));
         return view;
     }
 
@@ -95,15 +87,15 @@ final class UiKit {
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        view.setTextColor(textPrimary(context));
+        view.setTextColor(TEXT);
         return view;
     }
 
     static TextView body(Context context, String text) {
         TextView view = new TextView(context);
         view.setText(text);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        view.setTextColor(textPrimary(context));
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        view.setTextColor(TEXT);
         view.setLineSpacing(dp(context, 3), 1f);
         return view;
     }
@@ -111,19 +103,98 @@ final class UiKit {
     static TextView hint(Context context, String text) {
         TextView view = body(context, text);
         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        view.setTextColor(textSecondary(context));
+        view.setTextColor(TEXT_DIM);
         return view;
     }
 
     static View divider(Context context) {
         View view = new View(context);
-        view.setBackgroundColor(blend(cardBackground(context), textSecondary(context), 0.2f));
+        view.setBackgroundColor(STROKE);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, dp(context, 0.6f)));
-        params.topMargin = dp(context, 10);
-        params.bottomMargin = dp(context, 10);
+                ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, dp(context, 1)));
+        params.topMargin = dp(context, 12);
+        params.bottomMargin = dp(context, 12);
         view.setLayoutParams(params);
         return view;
+    }
+
+    /** Status pill: tinted rounded background, colored dot and text. */
+    static LinearLayout pill(Context context, String text, int statusColor) {
+        LinearLayout pill = new LinearLayout(context);
+        pill.setOrientation(LinearLayout.HORIZONTAL);
+        pill.setGravity(Gravity.CENTER_VERTICAL);
+        int tinted = Color.argb(36, Color.red(statusColor), Color.green(statusColor), Color.blue(statusColor));
+        GradientDrawable bg = round(context, tinted, 999, withAlpha(statusColor, 0.45f));
+        pill.setBackground(bg);
+        pill.setPadding(dp(context, 10), dp(context, 4), dp(context, 10), dp(context, 4));
+
+        View dot = new View(context);
+        GradientDrawable dotBg = new GradientDrawable();
+        dotBg.setShape(GradientDrawable.OVAL);
+        dotBg.setColor(statusColor);
+        dot.setBackground(dotBg);
+        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(context, 8), dp(context, 8));
+        dotParams.rightMargin = dp(context, 6);
+        dot.setLayoutParams(dotParams);
+        pill.addView(dot);
+
+        TextView label = new TextView(context);
+        label.setText(text);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        label.setTypeface(Typeface.DEFAULT_BOLD);
+        label.setTextColor(statusColor);
+        pill.addView(label);
+        return pill;
+    }
+
+    /** Rounded gradient monogram tile used in the header. */
+    static TextView monogram(Context context) {
+        TextView view = new TextView(context);
+        view.setText("EDC");
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        view.setTypeface(Typeface.DEFAULT_BOLD);
+        view.setTextColor(Color.WHITE);
+        view.setGravity(Gravity.CENTER);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setOrientation(GradientDrawable.Orientation.TL_BR);
+        bg.setColors(new int[] {ACCENT, ACCENT_DEEP});
+        bg.setCornerRadius(dp(context, 12));
+        view.setBackground(bg);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(context, 46), dp(context, 46));
+        params.rightMargin = dp(context, 12);
+        view.setLayoutParams(params);
+        return view;
+    }
+
+    // ------------------------------------------------------------------ buttons
+
+    private static void styleButton(Context context, Button button, boolean primary) {
+        button.setAllCaps(false);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        button.setTypeface(Typeface.DEFAULT_BOLD);
+        button.setMinHeight(0);
+        button.setMinWidth(0);
+        button.setPadding(dp(context, 12), dp(context, 9), dp(context, 12), dp(context, 9));
+        GradientDrawable bg = round(context,
+                primary ? color(context, R.color.accent_deep) : BTN, 10,
+                primary ? 0 : STROKE);
+        button.setTextColor(primary ? Color.WHITE : TEXT);
+        RippleDrawable ripple = new RippleDrawable(
+                ColorStateList.valueOf(withAlpha(Color.WHITE, 0.12f)), bg, bg);
+        button.setBackground(ripple);
+        button.setStateListAnimator(null);
+    }
+
+    static Button button(Context context, String text, boolean primary) {
+        Button button = new Button(context);
+        restyle(context, button, primary);
+        button.setText(text);
+        return button;
+    }
+
+    /** Restyles an existing button (e.g. when the activation state changes). */
+    static void restyle(Context context, Button button, boolean primary) {
+        styleButton(context, button, primary);
     }
 
     static LinearLayout buttonRow(Context context, View... buttons) {
@@ -143,10 +214,14 @@ final class UiKit {
         return row;
     }
 
-    static int blend(int base, int over, float ratio) {
-        int r = (int) (Color.red(base) * (1 - ratio) + Color.red(over) * ratio);
-        int g = (int) (Color.green(base) * (1 - ratio) + Color.green(over) * ratio);
-        int b = (int) (Color.blue(base) * (1 - ratio) + Color.blue(over) * ratio);
-        return Color.rgb(r, g, b);
+    /** Terminal-like panel background for the log view. */
+    static void terminalBg(Context context, View view) {
+        view.setBackground(round(context, 0xFF0A0D12, 12, color(context, R.color.stroke)));
+    }
+
+    // ------------------------------------------------------------------ misc
+
+    static int withAlpha(int color, float alpha) {
+        return Color.argb(Math.round(alpha * 255), Color.red(color), Color.green(color), Color.blue(color));
     }
 }

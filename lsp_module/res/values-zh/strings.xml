@@ -9,8 +9,8 @@
     <string name="section_settings">设置</string>
     <string name="section_log">日志</string>
     <string name="section_about">使用说明</string>
-    <string name="status_active">● 已激活</string>
-    <string name="status_inactive">○ 未检测到激活</string>
+    <string name="status_active">已激活</string>
+    <string name="status_inactive">未检测到激活</string>
     <string name="status_version">模块版本：%1$s</string>
     <string name="status_last_inject">最近注入：%1$s（%2$s）</string>
     <string name="status_framework">Xposed 框架：%1$s</string>

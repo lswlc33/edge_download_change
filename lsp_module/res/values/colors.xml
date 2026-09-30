@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark palette (GitHub-dark inspired) so the app looks the same on every device -->
+    <color name="bg">#0D1117</color>
+    <color name="card">#161B22</color>
+    <color name="stroke">#30363D</color>
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="accent">#4493F8</color>
+    <color name="accent_deep">#1F6FEB</color>
+    <color name="ok">#3FB950</color>
+    <color name="bad">#F85149</color>
+    <color name="btn_secondary">#21262D</color>
+    <color name="icon_bg">#1F6FEB</color>
+</resources>

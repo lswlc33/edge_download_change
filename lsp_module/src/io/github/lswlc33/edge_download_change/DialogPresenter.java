@@ -89,8 +89,7 @@ final class DialogPresenter {
             return;
         }
         try {
-            AlertDialog dialog = new AlertDialog.Builder(activity,
-                    android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            AlertDialog dialog = new AlertDialog.Builder(activity)
                     .setTitle(Str.dialogTitle())
                     .setMessage(message)
                     .setPositiveButton(Str.dialogDownload(), new DialogInterface.OnClickListener() {

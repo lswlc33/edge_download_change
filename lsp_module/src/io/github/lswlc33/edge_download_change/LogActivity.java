@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -33,11 +35,9 @@ public class LogActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(UiKit.dp(this, 12), UiKit.dp(this, 8), UiKit.dp(this, 12), UiKit.dp(this, 8));
+        root.setPadding(UiKit.dp(this, 16), UiKit.dp(this, 12), UiKit.dp(this, 16), UiKit.dp(this, 12));
 
-        Button copy = new Button(this);
-        copy.setText(R.string.log_copy_all);
-        copy.setAllCaps(false);
+        Button copy = UiKit.button(this, getString(R.string.log_copy_all), false);
         copy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,15 +48,13 @@ public class LogActivity extends Activity {
                 }
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null) {
-                    clipboard.setPrimaryClip(ClipData.newPlainText("EdgeSysDL log", content));
+                    clipboard.setPrimaryClip(ClipData.newPlainText("edge_download_change log", content));
                 }
                 toast(getString(R.string.toast_log_copied));
             }
         });
 
-        Button refresh = new Button(this);
-        refresh.setText(R.string.log_refresh);
-        refresh.setAllCaps(false);
+        Button refresh = UiKit.button(this, getString(R.string.log_refresh), true);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,9 +62,7 @@ public class LogActivity extends Activity {
             }
         });
 
-        Button clear = new Button(this);
-        clear.setText(R.string.log_clear_short);
-        clear.setAllCaps(false);
+        Button clear = UiKit.button(this, getString(R.string.log_clear_short), false);
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,12 +74,17 @@ public class LogActivity extends Activity {
 
         root.addView(UiKit.buttonRow(this, copy, refresh, clear));
 
+        TextView header = UiKit.hint(this, getString(R.string.log_hint));
+        header.setPadding(0, UiKit.dp(this, 10), 0, 0);
+        root.addView(header);
+
         text = new TextView(this);
         text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         text.setTypeface(Typeface.MONOSPACE);
-        text.setTextColor(UiKit.textPrimary(this));
+        text.setTextColor(Color.parseColor("#C9D1D9"));
         text.setTextIsSelectable(true);
-        text.setPadding(0, UiKit.dp(this, 8), 0, 0);
+        text.setPadding(UiKit.dp(this, 10), UiKit.dp(this, 10), UiKit.dp(this, 10), UiKit.dp(this, 10));
+        UiKit.terminalBg(this, text);
 
         scroll = new ScrollView(this);
         scroll.setFillViewport(true);

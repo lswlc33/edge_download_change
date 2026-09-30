@@ -28,10 +28,11 @@ import java.util.Locale;
 /** Module home screen: status, settings (interception + download target) and the log entry. */
 public class MainActivity extends Activity {
 
-    private TextView statusValue;
+    private LinearLayout statusPillBox;
     private TextView statusDetail;
     private TextView scopeValue;
     private TextView downloaderValue;
+    private Button openLsposedButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,17 +62,22 @@ public class MainActivity extends Activity {
 
     private View header() {
         LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(UiKit.dp(this, 4), UiKit.dp(this, 16), 0, UiKit.dp(this, 4));
+        box.setOrientation(LinearLayout.HORIZONTAL);
+        box.setGravity(Gravity.CENTER_VERTICAL);
+        box.setPadding(0, UiKit.dp(this, 14), 0, UiKit.dp(this, 2));
 
+        box.addView(UiKit.monogram(this));
+
+        LinearLayout labels = new LinearLayout(this);
+        labels.setOrientation(LinearLayout.VERTICAL);
         TextView title = UiKit.title(this, getString(R.string.app_name));
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         title.setTypeface(Typeface.DEFAULT_BOLD);
-        box.addView(title);
-
+        labels.addView(title);
         TextView subtitle = UiKit.hint(this, getString(R.string.main_subtitle));
-        subtitle.setPadding(0, UiKit.dp(this, 4), 0, 0);
-        box.addView(subtitle);
+        subtitle.setPadding(0, UiKit.dp(this, 2), 0, 0);
+        labels.addView(subtitle);
+        box.addView(labels);
         return box;
     }
 
@@ -79,12 +85,12 @@ public class MainActivity extends Activity {
         LinearLayout card = UiKit.card(this);
         card.addView(UiKit.sectionTitle(this, getString(R.string.section_status)));
 
-        statusValue = UiKit.body(this, "");
-        statusValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        card.addView(statusValue);
+        statusPillBox = new LinearLayout(this);
+        statusPillBox.setOrientation(LinearLayout.HORIZONTAL);
+        card.addView(statusPillBox);
 
         statusDetail = UiKit.hint(this, "");
-        statusDetail.setPadding(0, UiKit.dp(this, 6), 0, 0);
+        statusDetail.setPadding(0, UiKit.dp(this, 10), 0, 0);
         card.addView(statusDetail);
 
         card.addView(UiKit.divider(this));
@@ -92,9 +98,7 @@ public class MainActivity extends Activity {
         scopeValue = UiKit.hint(this, "");
         card.addView(scopeValue);
 
-        Button refresh = new Button(this);
-        refresh.setText(R.string.btn_refresh);
-        refresh.setAllCaps(false);
+        Button refresh = UiKit.button(this, getString(R.string.btn_refresh), false);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,15 +107,12 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button openManager = new Button(this);
-        openManager.setText(R.string.btn_open_lsposed);
-        openManager.setAllCaps(false);
-        openManager.setOnClickListener(new View.OnClickListener() {
+        openLsposedButton = UiKit.button(this, getString(R.string.btn_open_lsposed), true);
+        openLsposedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!LsposedLauncher.open(MainActivity.this)) {
-                    new AlertDialog.Builder(MainActivity.this,
-                            android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                    new AlertDialog.Builder(MainActivity.this)
                             .setTitle(R.string.manager_missing_title)
                             .setMessage(R.string.manager_missing_body)
                             .setPositiveButton(R.string.btn_ok, null)
@@ -119,7 +120,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        card.addView(UiKit.buttonRow(this, refresh, openManager));
+        card.addView(UiKit.buttonRow(this, refresh, openLsposedButton));
         return card;
     }
 
@@ -166,9 +167,7 @@ public class MainActivity extends Activity {
         targetLabels.addView(downloaderValue);
         targetRow.addView(targetLabels);
 
-        Button choose = new Button(this);
-        choose.setText(R.string.btn_choose);
-        choose.setAllCaps(false);
+        Button choose = UiKit.button(this, getString(R.string.btn_choose), false);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,9 +185,7 @@ public class MainActivity extends Activity {
         LinearLayout card = UiKit.card(this);
         card.addView(UiKit.sectionTitle(this, getString(R.string.section_log)));
 
-        Button open = new Button(this);
-        open.setText(R.string.log_open);
-        open.setAllCaps(false);
+        Button open = UiKit.button(this, getString(R.string.log_open), true);
         open.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,9 +193,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button clear = new Button(this);
-        clear.setText(R.string.log_clear);
-        clear.setAllCaps(false);
+        Button clear = UiKit.button(this, getString(R.string.log_clear), false);
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,10 +218,12 @@ public class MainActivity extends Activity {
     private void refresh() {
         boolean active = ModulePrefs.isActive(this);
         long last = ModulePrefs.lastReportTime(this);
+        int statusColor = active ? UiKit.color(this, R.color.ok) : UiKit.color(this, R.color.bad);
 
-        if (statusValue != null) {
-            statusValue.setText(active ? R.string.status_active : R.string.status_inactive);
-            statusValue.setTextColor(active ? 0xFF2E7D32 : 0xFFC62828);
+        if (statusPillBox != null) {
+            statusPillBox.removeAllViews();
+            statusPillBox.addView(UiKit.pill(this,
+                    getString(active ? R.string.status_active : R.string.status_inactive), statusColor));
         }
         if (statusDetail != null) {
             StringBuilder sb = new StringBuilder();
@@ -273,6 +270,10 @@ public class MainActivity extends Activity {
             }
             downloaderValue.setText(getString(R.string.settings_target_current, label));
         }
+        if (openLsposedButton != null) {
+            // When not activated, opening the manager is the primary action.
+            UiKit.restyle(this, openLsposedButton, !active);
+        }
     }
 
     private String moduleVersion() {
@@ -312,7 +313,7 @@ public class MainActivity extends Activity {
                 custom.length() == 0 ? getString(R.string.picker_custom_unset) : custom));
         ids.add(Downloaders.ID_CUSTOM);
 
-        new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+        new AlertDialog.Builder(this)
                 .setTitle(R.string.picker_title)
                 .setItems(labels.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
@@ -337,7 +338,7 @@ public class MainActivity extends Activity {
         input.setHint(R.string.custom_hint);
         input.setText(ModulePrefs.customPackage(this));
 
-        new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+        new AlertDialog.Builder(this)
                 .setTitle(R.string.custom_title)
                 .setView(input)
                 .setPositiveButton(R.string.btn_save, new DialogInterface.OnClickListener() {
