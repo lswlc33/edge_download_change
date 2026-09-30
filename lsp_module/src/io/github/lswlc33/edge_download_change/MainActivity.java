@@ -249,11 +249,7 @@ public class MainActivity extends Activity {
                     sb.append(getString(R.string.status_hook_ok));
                 }
             } else {
-                sb.append(getString(R.string.status_never_title)).append('\n')
-                        .append(getString(R.string.status_step1)).append('\n')
-                        .append(getString(R.string.status_step2)).append('\n')
-                        .append(getString(R.string.status_step3)).append('\n')
-                        .append(getString(R.string.status_step4));
+                sb.append(getString(R.string.status_never_title));
             }
             if (active && !ModulePrefs.isEnabled(this)) {
                 sb.append('\n').append(getString(R.string.status_disabled_hint));

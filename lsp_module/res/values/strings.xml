@@ -19,11 +19,11 @@
     <string name="status_hook_ok">hook installed</string>
     <string name="status_hook_failed">Note: the last hook installation failed, please check the log</string>
     <string name="status_disabled_hint">Note: interception is currently disabled, Edge uses its native downloader.</string>
-    <string name="status_never_title">No injection report from Edge yet. Please check:</string>
-    <string name="status_step1">1. the module is enabled in LSPosed;</string>
-    <string name="status_step2">2. the scope includes Edge (this module declares it statically, but some managers still need it checked manually);</string>
-    <string name="status_step3">3. Edge was force-stopped and reopened (switching to background is not enough), then wait about 10 seconds;</string>
-    <string name="status_step4">4. if it still does not appear, search the LSPosed log for \'EdgeSysDL\' and \'module loaded\'.</string>
+    <string name="status_never_title">No injection report yet. Make sure the module is enabled in LSPosed with Edge in scope, then force-stop and reopen Edge (wait ~10 s); if nothing shows, check the LSPosed log for EdgeSysDL.</string>
+    
+    
+    
+    
     <string name="scope_text">Scope: com.microsoft.emmx\n(declared statically by the module; if it stays inactive, confirm the scope in LSPosed)</string>
     <string name="btn_refresh">Refresh</string>
     <string name="btn_open_lsposed">Open LSPosed</string>
