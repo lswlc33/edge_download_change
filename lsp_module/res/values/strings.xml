@@ -47,6 +47,7 @@
     <string name="picker_missing">（not installed）</string>
     <string name="picker_custom">Custom package: %1$s</string>
     <string name="picker_custom_unset">not set</string>
+    <string name="btn_back">Back</string>
     <string name="btn_cancel">Cancel</string>
     <string name="custom_title">Custom downloader package</string>
     <string name="custom_hint">e.g. com.xunlei.downloadprovider</string>

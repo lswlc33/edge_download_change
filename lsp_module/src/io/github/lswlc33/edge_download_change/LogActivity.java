@@ -31,7 +31,6 @@ public class LogActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(R.string.log_title);
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -72,10 +71,32 @@ public class LogActivity extends Activity {
             }
         });
 
-        root.addView(UiKit.buttonRow(this, copy, refresh, clear));
+        // top bar: back arrow + title (the theme has no action bar, so the page
+        // needs its own way back)
+        LinearLayout topBar = new LinearLayout(this);
+        topBar.setOrientation(LinearLayout.HORIZONTAL);
+        topBar.setGravity(Gravity.CENTER_VERTICAL);
+        TextView back = UiKit.iconButton(this, "←");
+        back.setContentDescription(getString(R.string.btn_back));
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        topBar.addView(back);
+        TextView pageTitle = UiKit.title(this, getString(R.string.log_title));
+        pageTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        pageTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        topBar.addView(pageTitle);
+        root.addView(topBar, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout actions = UiKit.buttonRow(this, copy, refresh, clear);
+        root.addView(actions);
 
         TextView header = UiKit.hint(this, getString(R.string.log_hint));
-        header.setPadding(0, UiKit.dp(this, 10), 0, 0);
+        header.setPadding(0, UiKit.dp(this, 2), 0, 0);
         root.addView(header);
 
         text = new TextView(this);
@@ -83,15 +104,18 @@ public class LogActivity extends Activity {
         text.setTypeface(Typeface.MONOSPACE);
         text.setTextColor(Color.parseColor("#C9D1D9"));
         text.setTextIsSelectable(true);
-        text.setPadding(UiKit.dp(this, 10), UiKit.dp(this, 10), UiKit.dp(this, 10), UiKit.dp(this, 10));
+        text.setPadding(UiKit.dp(this, 12), UiKit.dp(this, 12), UiKit.dp(this, 12), UiKit.dp(this, 12));
         UiKit.terminalBg(this, text);
 
         scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         scroll.addView(text);
-        root.addView(scroll, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f);
+        scrollParams.topMargin = UiKit.dp(this, 4);
+        root.addView(scroll, scrollParams);
 
+        UiKit.applySystemBarPadding(root, 16, 12, 16, 12);
         setContentView(root);
     }
 

@@ -49,6 +49,8 @@ public class MainActivity extends Activity {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         scroll.addView(content);
+        // targetSdk 35 draws edge-to-edge on Android 15+: keep the content clear of the bars
+        UiKit.applySystemBarPadding(scroll, 0, 0, 0, 0);
         setContentView(scroll);
     }
 

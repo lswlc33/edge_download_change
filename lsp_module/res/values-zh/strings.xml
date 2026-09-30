@@ -45,6 +45,7 @@
     <string name="picker_missing">（未安装）</string>
     <string name="picker_custom">自定义包名：%1$s</string>
     <string name="picker_custom_unset">未设置</string>
+    <string name="btn_back">返回</string>
     <string name="btn_cancel">取消</string>
     <string name="custom_title">自定义下载器包名</string>
     <string name="custom_hint">例如 com.xunlei.downloadprovider</string>
