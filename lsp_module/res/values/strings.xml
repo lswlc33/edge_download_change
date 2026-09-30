@@ -6,20 +6,20 @@
     <string name="module_description">Replaces Edge\'s download popup with a Copy / Download dialog; downloads are handed over to the system downloader or a third-party downloader app.</string>
 
     <!-- Main screen -->
-    <string name="main_subtitle">Replaces Edge\'s download confirmation with a Copy / Download dialog; the download is created by the selected downloader, not by Edge.</string>
+    <string name="main_subtitle">Replaces Edge\'s download confirmation dialog with a Copy / Download dialog.</string>
     <string name="section_status">Status</string>
     <string name="section_settings">Settings</string>
     <string name="section_log">Log</string>
     <string name="section_about">Usage</string>
     <string name="status_active">Active</string>
-    <string name="status_inactive">Not activated</string>
+    <string name="status_inactive">No Edge process detected</string>
     <string name="status_version">Module version: %1$s</string>
     <string name="status_last_inject">Last injection: %1$s (%2$s)</string>
     <string name="status_framework">Xposed framework: %1$s</string>
     <string name="status_hook_ok">hook installed</string>
     <string name="status_hook_failed">Note: the last hook installation failed, please check the log</string>
     <string name="status_disabled_hint">Note: interception is currently disabled, Edge uses its native downloader.</string>
-    <string name="status_never_title">No injection report yet. Make sure the module is enabled in LSPosed with Edge in scope, then force-stop and reopen Edge (wait ~10 s); if nothing shows, check the LSPosed log for EdgeSysDL.</string>
+    <string name="status_never_title">Injection happens only while Edge is starting. Restart Edge, then come back here to check the status.</string>
     
     
     

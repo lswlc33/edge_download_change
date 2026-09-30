@@ -4,20 +4,20 @@
     <string name="module_description">把 Edge（com.microsoft.emmx）的下载弹窗替换为「复制 / 下载」对话框，下载交给系统下载器或第三方下载器 App。</string>
 
     <!-- 主界面 -->
-    <string name="main_subtitle">把 Edge 的下载确认框替换为「复制 / 下载」，下载由所选下载器创建，而不是 Edge 自己下载。</string>
+    <string name="main_subtitle">把 Edge 的下载确认框替换为「复制 / 下载」</string>
     <string name="section_status">状态</string>
     <string name="section_settings">设置</string>
     <string name="section_log">日志</string>
     <string name="section_about">使用说明</string>
     <string name="status_active">已激活</string>
-    <string name="status_inactive">未检测到激活</string>
+    <string name="status_inactive">未检测到EDGE进程</string>
     <string name="status_version">模块版本：%1$s</string>
     <string name="status_last_inject">最近注入：%1$s（%2$s）</string>
     <string name="status_framework">Xposed 框架：%1$s</string>
     <string name="status_hook_ok">hook 安装成功</string>
     <string name="status_hook_failed">注意：上次 hook 安装失败，请查看日志</string>
     <string name="status_disabled_hint">提示：当前已关闭拦截，Edge 将使用原生下载。</string>
-    <string name="status_never_title">尚未收到注入信息。请确认 LSPosed 已启用本模块并勾选 Edge 作用域，然后强制停止 Edge 重开（等约 10 秒）；仍无信息时，看 LSPosed 日志里的 EdgeSysDL。</string>
+    <string name="status_never_title">仅在EDGE启动时才会注入,重新启动Edge后返回查看状态</string>
     
     
     
