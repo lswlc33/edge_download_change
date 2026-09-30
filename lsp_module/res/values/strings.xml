@@ -2,7 +2,7 @@
 <!-- Default (English) strings. Chinese translations live in values-zh. -->
 <resources>
     <!-- The app name follows the project folder name (ASCII, no Chinese). -->
-    <string name="app_name" translatable="false">edge_download_change</string>
+    <string name="app_name" translatable="false">EDC</string>
     <string name="module_description">Replaces Edge\'s download popup with a Copy / Download dialog; downloads are handed over to the system downloader or a third-party downloader app.</string>
 
     <!-- Main screen -->

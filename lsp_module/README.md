@@ -3,7 +3,7 @@
 针对 Microsoft Edge for Android（`com.microsoft.emmx`，已验证 153.0.4234.49）的 LSPosed 模块，
 libxposed API（modern Xposed API）**102**（minApi 101）。当前版本 **2.4**。
 
-应用名 = 项目文件夹名（`edge_download_change`，ASCII，不随语言变化）；
+命名约定：**项目/仓库/APK 文件名 = `edge_download_change`**（ASCII）；**桌面与 LSPosed 里显示的名称 = `EDC`**（首字母缩写，`translatable="false"`，中英文一致）；界面描述文案仍为中英双语。
 界面文字提供**英文（values，默认）与中文（values-zh）**两套，跟随系统语言；
 注入侧（运行在 Edge 进程内，读不到本模块资源）使用 `Str.java` 里按系统语言选择的字符串表。
 
@@ -88,6 +88,9 @@ Edge 小版本更新时通常仍能工作。
 6. 8 秒内未对同一 URL+文件名重复弹窗。
 
 ## 版本记录
+
+**2.8**
+- **桌面/管理器显示名改为 `EDC`**（`app_name`；项目、仓库与 APK 文件名保持 `edge_download_change` 不变）。
 
 **2.6**
 - **包名改为 `io.github.lswlc33.edge_download_change`**（原 `com.edge.systemdownload`）：应用 id、
