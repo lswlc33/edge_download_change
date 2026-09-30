@@ -74,6 +74,10 @@ jobs:
               echo "::error::'$NEW_NAME' looks like a pre-release; betas are published by the Beta workflow"
               exit 1 ;;
           esac
+          if [ "$NEW_NAME" = "$OLD_NAME" ]; then
+            echo "::error::'$NEW_NAME' is already the released version - pass a NEW versionName or leave the input empty to auto-increment"
+            exit 1
+          fi
           sed -i "s/android:versionCode=\"[^\"]*\"/android:versionCode=\"${NEW_CODE}\"/" "$MANIFEST"
           sed -i "s/android:versionName=\"[^\"]*\"/android:versionName=\"${NEW_NAME}\"/" "$MANIFEST"
           sed -i "s/static final String VERSION = \"[^\"]*\";/static final String VERSION = \"${NEW_NAME}\";/" \
