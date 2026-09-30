@@ -170,6 +170,10 @@ public class MainActivity extends Activity {
         targetRow.addView(targetLabels);
 
         Button choose = UiKit.button(this, getString(R.string.btn_choose), false);
+        LinearLayout.LayoutParams chooseParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        chooseParams.leftMargin = UiKit.dp(this, 10);
+        choose.setLayoutParams(chooseParams);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

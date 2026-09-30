@@ -76,6 +76,7 @@ public class LogActivity extends Activity {
         LinearLayout topBar = new LinearLayout(this);
         topBar.setOrientation(LinearLayout.HORIZONTAL);
         topBar.setGravity(Gravity.CENTER_VERTICAL);
+        topBar.setPadding(0, UiKit.dp(this, 6), 0, UiKit.dp(this, 6));
         TextView back = UiKit.iconButton(this, "←");
         back.setContentDescription(getString(R.string.btn_back));
         back.setOnClickListener(new View.OnClickListener() {
@@ -88,12 +89,19 @@ public class LogActivity extends Activity {
         TextView pageTitle = UiKit.title(this, getString(R.string.log_title));
         pageTitle.setTypeface(Typeface.DEFAULT_BOLD);
         pageTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.leftMargin = UiKit.dp(this, 14);
+        pageTitle.setLayoutParams(titleParams);
         topBar.addView(pageTitle);
         root.addView(topBar, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         LinearLayout actions = UiKit.buttonRow(this, copy, refresh, clear);
-        root.addView(actions);
+        LinearLayout.LayoutParams actionsParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        actionsParams.topMargin = UiKit.dp(this, 6);
+        root.addView(actions, actionsParams);
 
         TextView header = UiKit.hint(this, getString(R.string.log_hint));
         header.setPadding(0, UiKit.dp(this, 2), 0, 0);

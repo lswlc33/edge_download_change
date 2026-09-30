@@ -266,7 +266,7 @@ final class UiKit {
         view.setGravity(Gravity.CENTER);
         view.setMinWidth(dp(context, 44));
         view.setMinHeight(dp(context, 44));
-        view.setPadding(dp(context, 8), 0, dp(context, 8), 0);
+        view.setPadding(dp(context, 10), 0, dp(context, 14), 0);
         view.setClickable(true);
         view.setFocusable(true);
         GradientDrawable bg = round(context, BTN, 12, 0);
