@@ -626,8 +626,12 @@ final class DownloadHooks {
         String referrer = Reflect.pickReferrer(info, url);
         Context context = application();
         if (context == null) return null;
+        String cleanName = sanitizeFileName(fileName, mime, url);
+        if (!cleanName.equals(fileName)) {
+            log(4, "sanitized file name: '" + fileName + "' -> '" + cleanName + "'");
+        }
         return new PendingDownload(guid, namespace, otrProfileId, serializeOtrProfileId(otrProfileId),
-                url, fileName, mime, referrer, service, context);
+                url, cleanName, mime, referrer, service, context);
     }
 
     // ------------------------------------------------------------------ interception: dialog first
@@ -1016,18 +1020,98 @@ final class DownloadHooks {
             if (slash >= 0) path = path.substring(slash + 1);
             path = android.net.Uri.decode(path);
             if (path.length() == 0) return "";
-            StringBuilder sb = new StringBuilder(path.length());
-            for (int i = 0; i < path.length(); i++) {
-                char ch = path.charAt(i);
-                if (ch == '/' || ch == '\\' || ch == ':' || ch == '*' || ch == '?' || ch == '"'
-                        || ch == '<' || ch == '>' || ch == '|' || ch < 0x20) {
-                    sb.append('_');
-                } else {
-                    sb.append(ch);
-                }
-            }
-            return sb.toString().replace("..", "_");
+            return sanitizePathChars(path);
         } catch (Throwable t) {
+            return "";
+        }
+    }
+
+    /**
+     * Cleans up a file name obtained from DownloadInfo: percent-decodes it (Edge sometimes
+     * hands us a raw percent-encoded string such as "%E6%96%87%E4%BB%B6.zip"), strips
+     * characters illegal in file names, and (when the name carries no extension) appends
+     * one derived from the MIME type so the third-party downloader stores the file with
+     * the correct suffix.
+     */
+    static String sanitizeFileName(String name, String mime, String url) {
+        String result = name == null ? "" : name;
+
+        // 1. Percent-decode when the name looks URL-encoded. Uri.decode leaves a lone '%'
+        //    untouched, so we only invoke it when we see at least one valid %XX triplet.
+        if (looksPercentEncoded(result)) {
+            try {
+                String decoded = android.net.Uri.decode(result);
+                if (decoded != null && decoded.length() > 0) {
+                    result = decoded;
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+
+        // 2. Strip characters that are illegal in file names.
+        result = sanitizePathChars(result);
+
+        // 3. Fall back to a URL-derived name if we still have nothing usable.
+        if (result.length() == 0) {
+            result = guessFileName(url);
+        }
+
+        // 4. If the name has no extension, derive one from the MIME type. We deliberately
+        //    do not overwrite an existing extension (the server knows better).
+        if (result.length() > 0 && !hasExtension(result)) {
+            String ext = extensionFromMime(mime);
+            if (ext.length() > 0) {
+                result = result + "." + ext;
+            }
+        }
+
+        return result;
+    }
+
+    private static boolean looksPercentEncoded(String value) {
+        int pct = value.indexOf('%');
+        while (pct >= 0 && pct + 2 < value.length()) {
+            char c1 = value.charAt(pct + 1);
+            char c2 = value.charAt(pct + 2);
+            if (isHex(c1) && isHex(c2)) return true;
+            pct = value.indexOf('%', pct + 1);
+        }
+        return false;
+    }
+
+    private static boolean isHex(char ch) {
+        return (ch >= '0' && ch <= '9')
+                || (ch >= 'a' && ch <= 'f')
+                || (ch >= 'A' && ch <= 'F');
+    }
+
+    private static String sanitizePathChars(String value) {
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (ch == '/' || ch == '\\' || ch == ':' || ch == '*' || ch == '?' || ch == '"'
+                    || ch == '<' || ch == '>' || ch == '|' || ch < 0x20) {
+                sb.append('_');
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString().replace("..", "_");
+    }
+
+    private static boolean hasExtension(String name) {
+        int dot = name.lastIndexOf('.');
+        // A leading dot (hidden file) is not treated as an extension separator, and a
+        // trailing dot is not a real extension either.
+        return dot > 0 && dot < name.length() - 1;
+    }
+
+    private static String extensionFromMime(String mime) {
+        if (mime == null || mime.length() == 0) return "";
+        try {
+            String ext = android.webkit.MimeTypeMap.getSingleton().getExtensionFromMimeType(mime);
+            return ext == null ? "" : ext;
+        } catch (Throwable ignored) {
             return "";
         }
     }
