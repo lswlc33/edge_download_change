@@ -23,7 +23,7 @@
     
     
     
-    <string name="scope_text">作用域：com.microsoft.emmx\n（模块已静态声明；若长时间未激活，请在 LSPosed 中确认作用域）</string>
+    <string name="scope_text">作用域：com.microsoft.emmx（含 dev / canary / beta 变体）\n（模块已静态声明；若长时间未激活，请在 LSPosed 中确认作用域）</string>
     <string name="btn_refresh">刷新状态</string>
     <string name="btn_open_lsposed">打开 LSPosed</string>
     <string name="toast_refreshed">状态已刷新</string>

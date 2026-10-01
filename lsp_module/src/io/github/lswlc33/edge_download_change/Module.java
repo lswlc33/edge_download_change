@@ -21,7 +21,7 @@ public class Module extends XposedModule {
 
     @Override
     public void onPackageLoaded(XposedModuleInterface.PackageLoadedParam param) {
-        if (!DownloadHooks.TARGET_PACKAGE.equals(param.getPackageName())) return;
+        if (!DownloadHooks.isTargetPackage(param.getPackageName())) return;
         try {
             DownloadHooks.install(this, param.getDefaultClassLoader());
         } catch (Throwable t) {
@@ -31,7 +31,7 @@ public class Module extends XposedModule {
 
     @Override
     public void onPackageReady(XposedModuleInterface.PackageReadyParam param) {
-        if (!DownloadHooks.TARGET_PACKAGE.equals(param.getPackageName())) return;
+        if (!DownloadHooks.isTargetPackage(param.getPackageName())) return;
         try {
             DownloadHooks.install(this, param.getClassLoader());
         } catch (Throwable t) {

@@ -20,7 +20,8 @@ import io.github.libxposed.api.XposedInterface.ExceptionMode;
 import io.github.libxposed.api.XposedInterface.Hooker;
 
 /**
- * Hooks Edge for Android (com.microsoft.emmx) and replaces its download flow.
+ * Hooks Edge for Android (com.microsoft.emmx and its dev/canary/beta variants) and replaces
+ * its download flow.
  *
  * Required behaviour: a dialog appears first; only when the user taps 下载 is a download
  * created - and that download is the Android system DownloadManager's, never Edge's own.
@@ -41,7 +42,25 @@ import io.github.libxposed.api.XposedInterface.Hooker;
  */
 final class DownloadHooks {
 
-    static final String TARGET_PACKAGE = "com.microsoft.emmx";
+    /**
+     * Edge for Android plus its official channel variants (dev / canary / beta). They share
+     * the same Chromium classes, so the same hooks apply; only the package differs.
+     */
+    static final String[] TARGET_PACKAGES = {
+            "com.microsoft.emmx",
+            "com.microsoft.emmx.dev",
+            "com.microsoft.emmx.canary",
+            "com.microsoft.emmx.beta",
+    };
+
+    static boolean isTargetPackage(String packageName) {
+        if (packageName == null) return false;
+        for (String pkg : TARGET_PACKAGES) {
+            if (pkg.equals(packageName)) return true;
+        }
+        return false;
+    }
+
     static final String TAG = "EdgeSysDL";
 
     /** How long a takeover (dialog shown / decision pending) stays valid. */
@@ -626,7 +645,7 @@ final class DownloadHooks {
         String referrer = Reflect.pickReferrer(info, url);
         Context context = application();
         if (context == null) return null;
-        String cleanName = sanitizeFileName(fileName, mime, url);
+        String cleanName = sanitizeFileName(fileName, mime, url, Reflect.pickOriginalUrl(info));
         if (!cleanName.equals(fileName)) {
             log(4, "sanitized file name: '" + fileName + "' -> '" + cleanName + "'");
         }
@@ -1027,16 +1046,39 @@ final class DownloadHooks {
     }
 
     /**
-     * Cleans up a file name obtained from DownloadInfo: percent-decodes it (Edge sometimes
-     * hands us a raw percent-encoded string such as "%E6%96%87%E4%BB%B6.zip"), strips
-     * characters illegal in file names, and (when the name carries no extension) appends
-     * one derived from the MIME type so the third-party downloader stores the file with
-     * the correct suffix.
+     * Derives the download's file name.
+     *
+     * The item is frequently created before Edge knows the target name
+     * ({@code DownloadInfo.e} is empty), so the name is resolved from several sources, in
+     * order of reliability:
+     *
+     * <ol>
+     *   <li>the name Edge reports (already decoded by the native layer when it came from a
+     *       Content-Disposition header);</li>
+     *   <li>the disposition/filename parameter the server embedded in the download URL
+     *       ({@code response-content-disposition}, {@code rscd}, {@code filename}) - signed
+     *       CDN URLs (GitHub release assets, OSS/S3) carry the real name only there;</li>
+     *   <li>the last path segment of the original (pre-redirect) URL, which keeps the
+     *       user-visible name when the final URL is an opaque id;</li>
+     *   <li>the last path segment of the final URL.</li>
+     * </ol>
+     *
+     * The result is percent-decoded, stripped of characters illegal in file names, and gets
+     * an extension from the MIME type when it has none.
      */
-    static String sanitizeFileName(String name, String mime, String url) {
+    static String sanitizeFileName(String name, String mime, String url, String originalUrl) {
         String result = name == null ? "" : name;
 
-        // 1. Percent-decode when the name looks URL-encoded. Uri.decode leaves a lone '%'
+        // 1./2./3. Fall back to the server-provided or URL-derived name when Edge's name is
+        //          empty at item-creation time.
+        if (result.length() == 0) {
+            result = fileNameFromQuery(url);
+        }
+        if (result.length() == 0) {
+            result = preferNamed(guessFileName(originalUrl), guessFileName(url));
+        }
+
+        // 4. Percent-decode when the name looks URL-encoded. Uri.decode leaves a lone '%'
         //    untouched, so we only invoke it when we see at least one valid %XX triplet.
         if (looksPercentEncoded(result)) {
             try {
@@ -1048,15 +1090,10 @@ final class DownloadHooks {
             }
         }
 
-        // 2. Strip characters that are illegal in file names.
+        // 5. Strip characters that are illegal in file names.
         result = sanitizePathChars(result);
 
-        // 3. Fall back to a URL-derived name if we still have nothing usable.
-        if (result.length() == 0) {
-            result = guessFileName(url);
-        }
-
-        // 4. If the name has no extension, derive one from the MIME type. We deliberately
+        // 6. If the name has no extension, derive one from the MIME type. We deliberately
         //    do not overwrite an existing extension (the server knows better).
         if (result.length() > 0 && !hasExtension(result)) {
             String ext = extensionFromMime(mime);
@@ -1066,6 +1103,76 @@ final class DownloadHooks {
         }
 
         return result;
+    }
+
+    /**
+     * Extracts a file name from the download URL's query string. Signed CDN URLs (GitHub
+     * release assets, OSS/S3) carry the real name in {@code response-content-disposition},
+     * {@code rscd} or a plain {@code filename} parameter while the path holds only an id.
+     */
+    private static String fileNameFromQuery(String url) {
+        if (url == null) return "";
+        int query = url.indexOf('?');
+        if (query < 0 || query >= url.length() - 1) return "";
+        for (String pair : url.substring(query + 1).split("&")) {
+            int eq = pair.indexOf('=');
+            if (eq <= 0) continue;
+            String key = decode(pair.substring(0, eq)).toLowerCase(java.util.Locale.ROOT);
+            String value = decode(pair.substring(eq + 1));
+            String name = "";
+            if (key.equals("filename")) {
+                name = stripQuotes(value);
+            } else if (key.equals("rscd") || key.contains("content-disposition")) {
+                name = dispositionFileName(value);
+            }
+            if (name.length() > 0) return name;
+        }
+        return "";
+    }
+
+    private static String decode(String value) {
+        try {
+            String decoded = android.net.Uri.decode(value);
+            return decoded == null ? value : decoded;
+        } catch (Throwable t) {
+            return value;
+        }
+    }
+
+    /** Pulls {@code filename=}/{@code filename*=} out of a Content-Disposition value. */
+    private static String dispositionFileName(String value) {
+        String lower = value.toLowerCase(java.util.Locale.ROOT);
+        int star = lower.indexOf("filename*=");
+        int plain = lower.indexOf("filename=");
+        int idx = star >= 0 ? star : plain;
+        if (idx < 0) return "";
+        int length = idx == star ? "filename*=".length() : "filename=".length();
+        String name = value.substring(idx + length);
+        int semi = name.indexOf(';');
+        if (semi >= 0) name = name.substring(0, semi);
+        name = name.trim();
+        if (idx == star) {
+            // RFC 5987: filename*=UTF-8''<name> - drop the charset'' prefix.
+            int charsetEnd = name.indexOf("''");
+            if (charsetEnd >= 0) name = name.substring(charsetEnd + 2);
+        }
+        return stripQuotes(name);
+    }
+
+    private static String stripQuotes(String value) {
+        String name = value == null ? "" : value.trim();
+        if (name.length() >= 2 && name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"') {
+            name = name.substring(1, name.length() - 1);
+        }
+        return name.trim();
+    }
+
+    /** Prefers the candidate that carries a real file extension; ties go to the first. */
+    private static String preferNamed(String first, String second) {
+        if (first.length() == 0) return second;
+        if (second.length() == 0) return first;
+        if (!hasExtension(first) && hasExtension(second)) return second;
+        return first;
     }
 
     private static boolean looksPercentEncoded(String value) {

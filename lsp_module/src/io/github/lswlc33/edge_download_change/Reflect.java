@@ -153,6 +153,26 @@ final class Reflect {
         return "";
     }
 
+    /**
+     * Picks the original (pre-redirect) download URL from the GURL field {@code i}.
+     *
+     * The final URL ({@code a}) is often a signed CDN/blob address whose last path segment is
+     * an opaque id (GitHub release assets, OSS/S3 buckets); the original URL keeps the
+     * user-visible file name and is therefore a much better source for the download name.
+     */
+    static String pickOriginalUrl(Object info) {
+        if (info == null) return "";
+        try {
+            Class<?> gurl = Class.forName("org.chromium.url.GURL", false, info.getClass().getClassLoader());
+            Field f = info.getClass().getDeclaredField("i");
+            if (!gurl.isAssignableFrom(f.getType())) return "";
+            String spec = urlString(read(f, info));
+            return isHttp(spec) ? spec : "";
+        } catch (Throwable t) {
+            return "";
+        }
+    }
+
     /** Picks the page/referrer URL out of the remaining GURL fields. */
     static String pickReferrer(Object info, String downloadUrl) {
         if (info == null) return "";
