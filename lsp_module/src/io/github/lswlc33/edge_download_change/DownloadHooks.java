@@ -718,7 +718,7 @@ final class DownloadHooks {
             sRecentItem = null;
             return null;
         }
-        String itemName = recent.fileName;
+        String itemName = recent.fileName();
         boolean nameKnown = itemName != null && itemName.length() > 0
                 && dialogName != null && dialogName.length() > 0;
         if (nameKnown && !namesMatch(dialogName, itemName)) {
@@ -732,6 +732,10 @@ final class DownloadHooks {
     // ------------------------------------------------------------------ dialog plumbing
 
     private static void showPendingAsync(final Activity activity, final PendingDownload download) {
+        // The item was created before the redirect chain played out, so the real name often
+        // only exists in the Content-Disposition header of the final response. Probe it in
+        // the background; the dialog (and any later hand-off) picks up the refined name.
+        NameProber.probeIfNeeded(download);
         final long takeoverAt = sTakeoverUntilMs;
         MAIN.post(new Runnable() {
             @Override
@@ -909,7 +913,7 @@ final class DownloadHooks {
     }
 
     /** Tolerant file-name comparison ("x (3).apk" vs "x.apk" style differences). */
-    private static boolean namesMatch(String a, String b) {
+    static boolean namesMatch(String a, String b) {
         if (a == null || b == null) return false;
         if (a.equals(b)) return true;
         String na = normalizeName(a);
@@ -1109,28 +1113,38 @@ final class DownloadHooks {
      * Extracts a file name from the download URL's query string. Signed CDN URLs (GitHub
      * release assets, OSS/S3) carry the real name in {@code response-content-disposition},
      * {@code rscd} or a plain {@code filename} parameter while the path holds only an id.
+     *
+     * The values may be double-encoded (GitHub's {@code response-content-disposition}
+     * arrives as {@code attachment%3B%20filename%3D%22x.apk%22}), so a disposition value is
+     * decoded once more before {@link #dispositionFileName} parses it.
      */
-    private static String fileNameFromQuery(String url) {
+    static String fileNameFromQuery(String url) {
         if (url == null) return "";
         int query = url.indexOf('?');
         if (query < 0 || query >= url.length() - 1) return "";
+        String best = "";
         for (String pair : url.substring(query + 1).split("&")) {
             int eq = pair.indexOf('=');
             if (eq <= 0) continue;
-            String key = decode(pair.substring(0, eq)).toLowerCase(java.util.Locale.ROOT);
+            String key = decode(pair.substring(0, eq)).trim().toLowerCase(java.util.Locale.ROOT);
             String value = decode(pair.substring(eq + 1));
             String name = "";
-            if (key.equals("filename")) {
+            if (key.equals("filename") || key.equals("filename*")) {
                 name = stripQuotes(value);
             } else if (key.equals("rscd") || key.contains("content-disposition")) {
-                name = dispositionFileName(value);
+                // The disposition itself is one more layer of URL-encoding deep.
+                name = dispositionFileName(decode(value));
             }
-            if (name.length() > 0) return name;
+            if (name.length() == 0) continue;
+            // Known-encoded names beat bare ones, but keep scanning: a later
+            // response-content-disposition parameter is more authoritative than filename.
+            if (best.length() == 0 || key.contains("content-disposition")) best = name;
+            if (key.contains("content-disposition")) break;
         }
-        return "";
+        return best;
     }
 
-    private static String decode(String value) {
+    static String decode(String value) {
         try {
             String decoded = android.net.Uri.decode(value);
             return decoded == null ? value : decoded;
@@ -1140,7 +1154,7 @@ final class DownloadHooks {
     }
 
     /** Pulls {@code filename=}/{@code filename*=} out of a Content-Disposition value. */
-    private static String dispositionFileName(String value) {
+    static String dispositionFileName(String value) {
         String lower = value.toLowerCase(java.util.Locale.ROOT);
         int star = lower.indexOf("filename*=");
         int plain = lower.indexOf("filename=");
@@ -1152,14 +1166,15 @@ final class DownloadHooks {
         if (semi >= 0) name = name.substring(0, semi);
         name = name.trim();
         if (idx == star) {
-            // RFC 5987: filename*=UTF-8''<name> - drop the charset'' prefix.
+            // RFC 5987: filename*=UTF-8''<percent-encoded name>.
             int charsetEnd = name.indexOf("''");
             if (charsetEnd >= 0) name = name.substring(charsetEnd + 2);
+            name = decode(name);
         }
         return stripQuotes(name);
     }
 
-    private static String stripQuotes(String value) {
+    static String stripQuotes(String value) {
         String name = value == null ? "" : value.trim();
         if (name.length() >= 2 && name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"') {
             name = name.substring(1, name.length() - 1);
@@ -1168,14 +1183,14 @@ final class DownloadHooks {
     }
 
     /** Prefers the candidate that carries a real file extension; ties go to the first. */
-    private static String preferNamed(String first, String second) {
+    static String preferNamed(String first, String second) {
         if (first.length() == 0) return second;
         if (second.length() == 0) return first;
         if (!hasExtension(first) && hasExtension(second)) return second;
         return first;
     }
 
-    private static boolean looksPercentEncoded(String value) {
+    static boolean looksPercentEncoded(String value) {
         int pct = value.indexOf('%');
         while (pct >= 0 && pct + 2 < value.length()) {
             char c1 = value.charAt(pct + 1);
@@ -1192,7 +1207,7 @@ final class DownloadHooks {
                 || (ch >= 'A' && ch <= 'F');
     }
 
-    private static String sanitizePathChars(String value) {
+    static String sanitizePathChars(String value) {
         StringBuilder sb = new StringBuilder(value.length());
         for (int i = 0; i < value.length(); i++) {
             char ch = value.charAt(i);
@@ -1206,14 +1221,14 @@ final class DownloadHooks {
         return sb.toString().replace("..", "_");
     }
 
-    private static boolean hasExtension(String name) {
+    static boolean hasExtension(String name) {
         int dot = name.lastIndexOf('.');
         // A leading dot (hidden file) is not treated as an extension separator, and a
         // trailing dot is not a real extension either.
         return dot > 0 && dot < name.length() - 1;
     }
 
-    private static String extensionFromMime(String mime) {
+    static String extensionFromMime(String mime) {
         if (mime == null || mime.length() == 0) return "";
         try {
             String ext = android.webkit.MimeTypeMap.getSingleton().getExtensionFromMimeType(mime);

@@ -25,9 +25,7 @@ final class DialogPresenter {
 
     /** Dialog for a download whose real URL is already known. */
     static void showForPending(final Activity activity, final PendingDownload download) {
-        String message = download.displayName() + "\n\n" + download.url
-                + "\n\n「下载」将交给 " + RemoteSettings.downloaderLabel();
-        show(activity, message,
+        final AlertDialog dialog = show(activity, messageFor(download),
                 new Runnable() {
                     @Override
                     public void run() {
@@ -46,6 +44,20 @@ final class DialogPresenter {
                         DownloadHooks.resolvePending(download, ACTION_DISMISS);
                     }
                 });
+        // The name is probed in the background; refresh the text when it arrives.
+        download.setNameListener(new PendingDownload.NameListener() {
+            @Override
+            public void onNameChanged(String newName) {
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.setMessage(messageFor(download));
+                }
+            }
+        });
+    }
+
+    private static String messageFor(PendingDownload download) {
+        return download.displayName() + "\n\n" + download.url
+                + "\n\n「下载」将交给 " + RemoteSettings.downloaderLabel();
     }
 
     /**
@@ -80,13 +92,13 @@ final class DialogPresenter {
                 });
     }
 
-    private static void show(final Activity activity, String message,
+    private static AlertDialog show(final Activity activity, String message,
             final Runnable onCopy, final Runnable onDownload, final Runnable onDismiss) {
         if (activity == null || activity.isFinishing()
                 || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed())) {
             DownloadHooks.log(4, "no usable activity for the dialog, dismissing");
             onDismiss.run();
-            return;
+            return null;
         }
         try {
             AlertDialog dialog = new AlertDialog.Builder(activity)
@@ -113,9 +125,11 @@ final class DialogPresenter {
                     .create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
+            return dialog;
         } catch (Throwable t) {
             DownloadHooks.log(5, "showing the dialog failed", t);
             onDismiss.run();
+            return null;
         }
     }
 
